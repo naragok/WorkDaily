@@ -1,0 +1,2550 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트 단일현장 작업일보 시스템 - 캠프롱 문화체육공원 조성사업</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f1f5f9;
+        }
+        @media print {
+            body {
+                background-color: #ffffff;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            /* 인쇄 프레임: 실제 A4 1장 분량의 고정 영역. 내부 콘텐츠는 자동 축소되어 이 영역 안에 항상 맞춰짐 */
+            .print-frame {
+                width: 210mm !important;
+                height: 297mm !important;
+                max-height: 297mm !important;
+                overflow: hidden !important;
+                page-break-after: always !important;
+                box-sizing: border-box !important;
+                position: relative !important;
+                margin: 0 !important;
+            }
+            .print-frame:last-child {
+                page-break-after: avoid !important;
+            }
+            /* 인쇄 콘텐츠: 높이 제한 없이 자유롭게 늘어나며, JS가 프레임에 맞춰 축소(scale) 처리 */
+            .print-page {
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 8mm 10mm !important;
+                width: 210mm !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
+                box-sizing: border-box !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: flex-start !important;
+                transform-origin: top left !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+            }
+            /* 인쇄 시 선 굵기 및 높이 동일화 */
+            th, td {
+                border: 1px solid #000000 !important;
+                height: 21px !important;
+                padding: 1px 3px !important;
+                font-size: 9.5px !important;
+                box-sizing: border-box !important;
+            }
+            input, textarea, select {
+                font-size: 9.5px !important;
+                line-height: 1.1 !important;
+            }
+            /* 사진대지 인쇄 최적화 */
+            #photo-grid {
+                gap: 8px !important;
+            }
+            .print-page #photo-grid > div {
+                height: 215px !important;
+            }
+            .print-page #photo-grid img {
+                height: 135px !important;
+            }
+        }
+        /* A4 규격 스타일 구조화 */
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            padding: 10mm 12mm;
+            box-sizing: border-box;
+            position: relative;
+        }
+        input, textarea, select {
+            border: none !important;
+            background: transparent !important;
+            width: 100%;
+            height: 100%;
+            padding: 2px 4px;
+            text-align: inherit;
+            font-size: inherit;
+            font-weight: inherit;
+            color: inherit;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: 2px solid #2563eb !important;
+            background: #eff6ff !important;
+            border-radius: 2px;
+        }
+        /* 작업사항 등 자동 높이조절 텍스트영역: 내용에 맞춰 칸 높이가 늘어남 */
+        textarea.auto-grow {
+            height: auto !important;
+            min-height: 100%;
+            overflow: hidden;
+            display: block;
+        }
+        /* 테이블 보더 겹침 해결 */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid #1e293b;
+            padding: 3px;
+            font-size: 11px;
+            height: 25px;
+            box-sizing: border-box;
+        }
+        .title-cell {
+            background-color: #f1f5f9;
+            font-weight: bold;
+            text-align: center;
+        }
+        /* 인쇄 경계 보조선 스타일 */
+        .print-boundary {
+            border-bottom: 2px dashed #f43f5e !important;
+            position: relative;
+        }
+        .print-boundary::after {
+            content: "A4 인쇄 1페이지 경계선 (이 지점 밑으로는 다음 장에 인쇄됩니다)";
+            position: absolute;
+            right: 10px;
+            bottom: -20px;
+            color: #f43f5e;
+            font-size: 10px;
+            font-weight: bold;
+            background: white;
+            padding: 2px 6px;
+            border: 1px solid #f43f5e;
+            border-radius: 4px;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- 상단 고정 네비게이션 컨트롤러 (인쇄 시 숨김) -->
+    <header class="no-print sticky top-0 z-40 bg-slate-900 text-white shadow-xl px-6 py-4 flex flex-col gap-3">
+        <div class="flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2.5 rounded-xl shadow-md shadow-blue-950">
+                    <i data-lucide="building-2" class="w-6 h-6 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-black tracking-tight text-white flex items-center gap-2">캠프롱 문화체육공원 작업일보 <span class="bg-blue-500 text-[10px] text-white px-2 py-0.5 rounded-full font-normal">v6.1 Page-Fit</span></h1>
+                    <p class="text-xs text-slate-400">통합 단일 현장 관리 / 인쇄 시 좌우 대칭 격자라인 자동 매칭 및 페이지 칼맞춤</p>
+                </div>
+            </div>
+            
+            <!-- 관리 도구 버튼 그룹 -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <button onclick="saveToLocalStorage()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                    <i data-lucide="save" class="w-4 h-4"></i> 작성중 저장
+                </button>
+                <button onclick="exportToJSON()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                    <i data-lucide="download" class="w-4 h-4"></i> 백업 파일(JSON)
+                </button>
+                <label class="bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="upload" class="w-4 h-4"></i> 백업 열기
+                    <input type="file" id="json-file" accept=".json" class="hidden" onchange="importFromJSON(event)">
+                </label>
+                <button onclick="exportToCSV()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> 엑셀용 CSV
+                </button>
+                <button onclick="fitPagesToPrint(); window.print();" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                    <i data-lucide="printer" class="w-4 h-4"></i> A4 인쇄 / PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- 2층 컨트롤러: 날짜 선택기 및 부가 뷰 기능 -->
+        <div class="border-t border-slate-800 pt-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3 flex-wrap">
+                <!-- 날짜 선택기 -->
+                <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-sm">
+                    <span class="text-slate-400 font-bold text-xs">일보 날짜:</span>
+                    <input type="date" id="report-date-picker" onchange="changeReportDate()" class="text-white !bg-transparent text-sm w-36 cursor-pointer outline-none">
+                </div>
+
+                <div onclick="openDatabaseListModal()" class="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 px-2 py-1.5 rounded-lg text-xs border border-slate-700 cursor-pointer transition" title="저장된 일자 목록 확인">
+                    <span class="text-slate-400">데이터베이스 보존수:</span>
+                    <span id="saved-reports-count" class="font-bold text-emerald-400">1</span>개 일자
+                    <i data-lucide="list" class="w-3.5 h-3.5 text-slate-400"></i>
+                </div>
+
+                <button onclick="createNewReportForCurrentDate()" class="bg-blue-700 hover:bg-blue-600 text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1">
+                    <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i> 새 날짜 일보 생성 (전일 자동연동)
+                </button>
+
+                <!-- 기본 프리셋 초기화 복원 기능 -->
+                <button onclick="triggerRestoreDefault()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1">
+                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> 기본 데이터 프리셋 복원
+                </button>
+            </div>
+            
+            <div class="flex items-center gap-4 text-xs">
+                <label class="flex items-center gap-2 cursor-pointer text-slate-300">
+                    <input type="checkbox" id="toggle-guide-line" onchange="toggleA4Guidelines()" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500">
+                    인쇄 경계선 표시
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer text-slate-300">
+                    <input type="checkbox" id="toggle-dashboard" onchange="toggleDashboardView()" checked class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500">
+                    실시간 대시보드 표시
+                </label>
+            </div>
+        </div>
+    </header>
+
+    <!-- 실시간 현장 통합 통계 대시보드 위젯 (인쇄 시 자동 제외) -->
+    <section id="dashboard-widget" class="no-print container mx-auto mt-6 px-4">
+        <div class="bg-white rounded-xl shadow-md p-5 border border-slate-200">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                    <i data-lucide="layout-dashboard" class="text-blue-600 w-4 h-4"></i> 실시간 현장 투입 모니터링 대시보드
+                </h3>
+                <span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded font-bold">캠프롱 문화체육공원</span>
+            </div>
+            <div class="grid grid-cols-4 gap-4">
+                <!-- 인원 집계 -->
+                <div class="bg-slate-50 p-4 rounded-xl border flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-slate-500 block">금일 총 투입 출력</span>
+                        <span id="dash-manpower-today" class="text-2xl font-black text-slate-800">0</span>
+                        <span class="text-xs text-slate-400 ml-1">명</span>
+                    </div>
+                    <div class="bg-blue-100 text-blue-800 p-2.5 rounded-xl">
+                        <i data-lucide="users" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <!-- 장비 집계 -->
+                <div class="bg-slate-50 p-4 rounded-xl border flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-slate-500 block">금일 가동 중장비</span>
+                        <span id="dash-equipment-today" class="text-2xl font-black text-slate-800">0</span>
+                        <span class="text-xs text-slate-400 ml-1">대</span>
+                    </div>
+                    <div class="bg-emerald-100 text-emerald-800 p-2.5 rounded-xl">
+                        <i data-lucide="truck" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <!-- 대비 진행률 계산기 -->
+                <div class="bg-slate-50 p-4 rounded-xl border flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-slate-500 block">진척율 대비 효율</span>
+                        <span id="dash-compare-rate" class="text-2xl font-black text-blue-600">0%</span>
+                    </div>
+                    <div class="bg-indigo-100 text-indigo-800 p-2.5 rounded-xl">
+                        <i data-lucide="activity" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <!-- 자재수 집계 -->
+                <div class="bg-slate-50 p-4 rounded-xl border flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-slate-500 block">등록 자재 마스터</span>
+                        <span id="dash-material-count" class="text-2xl font-black text-slate-800">0</span>
+                        <span class="text-xs text-slate-400 ml-1">품목</span>
+                    </div>
+                    <div class="bg-amber-100 text-amber-800 p-2.5 rounded-xl">
+                        <i data-lucide="package" class="w-6 h-6"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <main class="container mx-auto py-8 px-4 flex flex-col gap-8 items-center">
+        
+        <!-- ================= PAGE 1: 작업일보 ================= -->
+        <div class="print-frame" id="frame-1">
+        <section class="print-page a4-page flex flex-col justify-between" id="page-1">
+            <div>
+                <!-- 문서 타이틀 영역 -->
+                <div class="flex justify-between items-end border-b-2 border-slate-900 pb-2 mb-3">
+                    <div>
+                        <h2 class="text-2xl font-black tracking-widest text-slate-900" style="font-family:'Noto Sans KR'; font-weight:900;">작 업 일 보</h2>
+                        <span class="text-[11px] text-slate-500 mt-0.5">원주 캠프롱 문화체육공원 조성사업 통합 현장 시스템</span>
+                    </div>
+                    <!-- 결재란 -->
+                    <table class="w-auto border-collapse mb-1 text-center" style="width: 140px;">
+                        <tr>
+                            <td rowspan="2" class="title-cell text-[10px] w-[30px]" style="padding: 2px; line-height:1.2;">결<br>제</td>
+                            <td class="title-cell text-[10px]" style="padding: 2px;">현장대리인</td>
+                        </tr>
+                        <tr>
+                            <td class="h-[48px] relative text-[11px]" style="vertical-align: middle;">
+                                <input type="text" id="report-manager" value="김 종남" class="text-center font-semibold">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- 기본 개요 테이블 -->
+                <table class="mb-3">
+                    <tbody>
+                        <tr>
+                            <td class="title-cell w-[12%]">공 사 명</td>
+                            <td class="w-[43%]" colspan="3">
+                                <input type="text" id="report-project-name" value="캠프롱 문화체육공원 조성사업(조경, 토목)" class="font-semibold text-left">
+                            </td>
+                            <td class="title-cell w-[10%]">날 씨</td>
+                            <td class="w-[20%]" colspan="2">
+                                <div class="flex items-center gap-1">
+                                    <input type="text" id="report-weather" value="맑음" class="text-center w-12 shrink-0">
+                                    <div class="flex gap-0.5 no-print">
+                                        <button onclick="setWeatherPreset('맑음')" class="bg-slate-200 hover:bg-blue-100 text-[9px] px-1 py-0.5 rounded">맑음</button>
+                                        <button onclick="setWeatherPreset('우천')" class="bg-slate-200 hover:bg-blue-100 text-[9px] px-1 py-0.5 rounded">우천</button>
+                                        <button onclick="setWeatherPreset('강풍')" class="bg-slate-200 hover:bg-blue-100 text-[9px] px-1 py-0.5 rounded">강풍</button>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="title-cell w-[7%]">일 자</td>
+                            <td class="w-[15%] text-center font-medium">
+                                <input type="text" id="report-date" value="2026년 06월 20일 토요일" class="text-center text-[10px]">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="title-cell">계획 대비</td>
+                            <td class="text-center" style="width: 20%">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span class="text-[9px] text-slate-500">계획:</span>
+                                    <input type="text" id="rate-planned" value="82.29%" oninput="calculateProgress()" class="w-12 text-center font-bold">
+                                </div>
+                            </td>
+                            <td class="text-center" style="width: 20%">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span class="text-[9px] text-slate-500">실적:</span>
+                                    <input type="text" id="rate-actual" value="83.31%" oninput="calculateProgress()" class="w-12 text-center font-bold text-emerald-700">
+                                </div>
+                            </td>
+                            <td class="text-center" style="width: 15%" colspan="2">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span class="text-[9px] text-slate-500">대비:</span>
+                                    <input type="text" id="rate-compare" value="101.24%" class="w-12 text-center font-bold text-blue-700" readonly>
+                                </div>
+                            </td>
+                            <td class="title-cell">공기 현황</td>
+                            <td class="text-center text-[10px]" colspan="3">
+                                <div class="flex items-center justify-center">
+                                    <span>잔여: </span>
+                                    <input type="text" id="period-remain" value="60일" class="w-8 text-center font-bold">
+                                    <span class="text-[9px] text-slate-400">/ 준공: 2026.08.28</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- 작업 사항 요약 -->
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div class="border border-slate-800 rounded-sm">
+                        <div class="title-cell border-b border-slate-800 text-xs py-1 font-bold">금일 작업 사항</div>
+                        <div class="p-2 text-[11px] leading-relaxed">
+                            <textarea id="today-works" rows="3" class="w-full resize-none leading-normal auto-grow" oninput="autoGrowTextarea(this)">○ 전체 : 우천 작업 대기&#10;○ 전체 : 휴일 작업 대기</textarea>
+                        </div>
+                    </div>
+                    <div class="border border-slate-800 rounded-sm">
+                        <div class="title-cell border-b border-slate-800 text-xs py-1 font-bold">명일 작업 사항</div>
+                        <div class="p-2 text-[11px] leading-relaxed">
+                            <textarea id="tomorrow-works" rows="3" class="w-full resize-none leading-normal auto-grow" oninput="autoGrowTextarea(this)">○ 토공 및 관로공 잔여 분할 시공&#10;○ 조경 식재 준비 및 부지 정비</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 섹션 타이틀: 자재 투입 현황 -->
+                <div class="bg-slate-800 text-white text-[11px] font-bold py-1 px-2 mb-1 flex justify-between items-center">
+                    <span>■ 자재 투입 현황 (자재명 / 규격 / 단위 / 설계 / 금일 / 누계)</span>
+                    <span class="text-[9px] font-light text-slate-300 no-print">좌우 격자 선높이가 정밀하게 자동 매칭 처리됩니다.</span>
+                </div>
+
+                <!-- 자재 투입 현황 테이블 (2분할 레이아웃) -->
+                <div class="grid grid-cols-2 gap-0 border border-slate-900 mb-3">
+                    <!-- 좌측 자재 테이블 -->
+                    <div>
+                        <table class="border-none">
+                            <thead>
+                                <tr class="title-cell">
+                                    <th class="border-t-0 border-l-0 w-[24%] text-[10px]">자재명</th>
+                                    <th class="border-t-0 w-[18%] text-[10px]">규격</th>
+                                    <th class="border-t-0 w-[8%] text-[10px]">단위</th>
+                                    <th class="border-t-0 w-[13%] text-[10px]">설계</th>
+                                    <th class="border-t-0 w-[13%] text-[10px]">금일</th>
+                                    <th class="border-t-0 w-[16%] text-[10px]">누계</th>
+                                    <th class="border-t-0 border-r-0 w-[8%] text-[10px] no-print">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="materials-left-body">
+                                <!-- JS로 렌더링 됩니다. -->
+                            </tbody>
+                        </table>
+                        <div class="p-1 text-center no-print border-t border-slate-900">
+                            <button onclick="addRow('left')" class="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center justify-center gap-1 mx-auto">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i> 좌측 자재 행 추가
+                            </button>
+                        </div>
+                    </div>
+                    <!-- 우측 자재 테이블 -->
+                    <div class="border-l border-slate-950">
+                        <table class="border-none">
+                            <thead>
+                                <tr class="title-cell">
+                                    <th class="border-t-0 border-l-0 w-[24%] text-[10px]">자재명</th>
+                                    <th class="border-t-0 w-[18%] text-[10px]">규격</th>
+                                    <th class="border-t-0 w-[8%] text-[10px]">단위</th>
+                                    <th class="border-t-0 w-[13%] text-[10px]">설계</th>
+                                    <th class="border-t-0 w-[13%] text-[10px]">금일</th>
+                                    <th class="border-t-0 w-[16%] text-[10px]">누계</th>
+                                    <th class="border-t-0 border-r-0 w-[8%] text-[10px] no-print">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="materials-right-body">
+                                <!-- JS로 렌더링 됩니다. -->
+                            </tbody>
+                        </table>
+                        <div class="p-1 text-center no-print border-t border-slate-900">
+                            <button onclick="addRow('right')" class="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center justify-center gap-1 mx-auto">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i> 우측 자재 행 추가
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 인원 및 장비 / 환경 안전 요약 2분할 -->
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- 인원 투입 현황 -->
+                    <div>
+                        <div class="bg-slate-800 text-white text-[11px] font-bold py-1 px-2 mb-1 flex justify-between items-center">
+                            <span>■ 인원 투입 현황</span>
+                            <button onclick="addManpowerRow()" class="text-[10px] text-blue-400 hover:text-white font-bold flex items-center gap-1 no-print">
+                                <i data-lucide="plus" class="w-3 h-3"></i> 인원 행 추가
+                            </button>
+                        </div>
+                        <table class="text-center">
+                            <thead>
+                                <tr class="title-cell">
+                                    <th class="w-[45%]">직종</th>
+                                    <th class="w-[20%]">금일</th>
+                                    <th class="w-[25%]">누계</th>
+                                    <th class="w-[10%] no-print">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="manpower-body">
+                                <!-- JS로 인원 데이터 렌더링 -->
+                            </tbody>
+                        </table>
+
+                        <!-- 폐기물 처리 현황 -->
+                        <div class="bg-slate-800 text-white text-[11px] font-bold py-1 px-2 mb-1 mt-3">
+                            ■ 폐기물 처리 현황
+                        </div>
+                        <table class="text-center">
+                            <thead>
+                                <tr class="title-cell">
+                                    <th class="w-[34%]">품목</th>
+                                    <th class="w-[22%]">설계량</th>
+                                    <th class="w-[22%]">금일</th>
+                                    <th class="w-[22%]">누계</th>
+                                </tr>
+                            </thead>
+                            <tbody id="waste-body">
+                                <!-- JS로 폐기물 데이터 렌더링 -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 장비 및 안전/환경 관리 사항 -->
+                    <div class="flex flex-col gap-2">
+                        <div>
+                            <div class="bg-slate-800 text-white text-[11px] font-bold py-1 px-2 mb-1 flex justify-between items-center">
+                                <span>■ 장비 투입 현황</span>
+                                <button onclick="addEquipmentRow()" class="text-[10px] text-blue-400 hover:text-white font-bold flex items-center gap-1 no-print">
+                                    <i data-lucide="plus" class="w-3 h-3"></i> 장비 행 추가
+                                </button>
+                            </div>
+                            <table class="text-center">
+                                <thead>
+                                    <tr class="title-cell">
+                                        <th class="w-[45%]">장비명</th>
+                                        <th class="w-[20%]">금일</th>
+                                        <th class="w-[25%]">누계</th>
+                                        <th class="w-[10%] no-print">관리</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="equipment-body">
+                                    <!-- JS로 장비 데이터 렌더링 -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div>
+                            <div class="bg-slate-800 text-white text-[11px] font-bold py-1 px-2 mb-1">
+                                ■ 안전 및 환경 관리
+                            </div>
+                            <table class="text-left">
+                                <tbody>
+                                    <tr>
+                                        <td class="title-cell w-[30%] text-center">안전관리</td>
+                                        <td>
+                                            <input type="text" id="safety-mgmt" value="TBM(작업 전 안전점검) 실시, 현장 순찰" class="text-left font-medium">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="title-cell text-center">환경관리</td>
+                                        <td>
+                                            <input type="text" id="env-mgmt" value="폐콘크리트 성상별 보관 및 세륜기 운행" class="text-left font-medium">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+        </div>
+
+        <!-- ================= PAGE 2: 사진대지 ================= -->
+        <div class="print-frame" id="frame-2">
+        <section class="print-page a4-page flex flex-col justify-between" id="page-2">
+            <div>
+                <!-- 사진대지 헤더 -->
+                <div class="flex justify-between items-end border-b-2 border-slate-900 pb-2 mb-4">
+                    <div>
+                        <h2 class="text-2xl font-black tracking-widest text-slate-900" style="font-family:'Noto Sans KR'; font-weight:900;">사 진 대 지</h2>
+                        <div class="text-[11px] text-slate-500 mt-1">현장 주요 작업 진행 사진 및 마크업 기록</div>
+                    </div>
+                    <div class="text-[11px] text-slate-600 font-bold mb-1 flex items-center gap-2">
+                        <span>작성일자:</span>
+                        <input type="text" id="photo-date" value="2026-06-20" class="w-24 text-center border-b border-slate-400 !border-solid">
+                    </div>
+                </div>
+
+                <!-- 사진대지 개요 -->
+                <table class="mb-4">
+                    <tbody>
+                        <tr>
+                            <td class="title-cell w-[15%]">공 사 명</td>
+                            <td class="w-[50%] font-semibold" colspan="2">원주 캠프롱 문화체육공원 조성사업</td>
+                            <td class="title-cell w-[15%]">공 종</td>
+                            <td class="w-[20%] text-center">조경 및 토목공사</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- 사진대지 전용 레이아웃 선택 도구 -->
+                <div class="no-print bg-slate-100 p-2.5 rounded-lg border mb-4 flex justify-between items-center">
+                    <span class="text-xs font-bold text-slate-700">인쇄용 사진대지 정렬 편집기:</span>
+                    <div class="flex gap-2">
+                        <button onclick="changePhotoLayout('grid', true)" id="layout-btn-grid" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded font-bold">2열 바둑판 (기본)</button>
+                        <button onclick="changePhotoLayout('list', true)" id="layout-btn-list" class="bg-slate-200 text-slate-700 text-xs px-3 py-1.5 rounded font-bold hover:bg-slate-300">1열 크게 보기 (상세)</button>
+                    </div>
+                </div>
+
+                <!-- 사진 그리드 영역 -->
+                <div class="grid grid-cols-2 gap-x-4 gap-y-4" id="photo-grid">
+                    <!-- Photo Card 1 -->
+                    <div id="photo-card-container-1" class="border border-slate-400 flex flex-col justify-between h-[255px] p-2 bg-slate-50 relative group">
+                        <div id="photo-img-box-1" class="w-full h-[165px] border border-dashed border-slate-300 rounded flex flex-col items-center justify-center overflow-hidden bg-white relative">
+                            <img id="img-preview-1" class="w-full h-full object-contain hidden">
+                            <div id="img-placeholder-1" class="text-center cursor-pointer no-print" onclick="triggerUpload(1)">
+                                <i data-lucide="image-plus" class="w-8 h-8 text-slate-400 mx-auto mb-1"></i>
+                                <span class="text-[10px] text-slate-500">사진 업로드 (압축 지원)</span>
+                            </div>
+                            <div class="absolute top-1 right-1 flex gap-1 no-print">
+                                <button id="edit-btn-1" onclick="openDrawingEditor(1)" class="bg-blue-600 hover:bg-blue-700 text-white rounded p-1 shadow hidden" title="사진 마크업/선 그리기">
+                                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button id="del-btn-1" onclick="deleteImage(1)" class="bg-rose-600 hover:bg-rose-700 text-white rounded p-1 shadow hidden" title="삭제">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                            <input type="file" id="file-input-1" accept="image/*" class="hidden" onchange="previewImageAndCompress(event, 1)">
+                        </div>
+                        <div class="mt-2 text-[11px]">
+                            <div class="flex items-center gap-1 mb-1 border-b border-slate-200 pb-0.5">
+                                <span class="font-bold text-blue-800 shrink-0">위치:</span>
+                                <input type="text" id="photo-loc-1" value="" class="font-medium !text-left">
+                            </div>
+                            <div class="flex items-start gap-1">
+                                <span class="font-bold text-slate-600 shrink-0">내용:</span>
+                                <textarea id="photo-desc-1" rows="2" class="w-full resize-none !text-left leading-tight"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Photo Card 2 -->
+                    <div id="photo-card-container-2" class="border border-slate-400 flex flex-col justify-between h-[255px] p-2 bg-slate-50 relative group">
+                        <div id="photo-img-box-2" class="w-full h-[165px] border border-dashed border-slate-300 rounded flex flex-col items-center justify-center overflow-hidden bg-white relative">
+                            <img id="img-preview-2" class="w-full h-full object-contain hidden">
+                            <div id="img-placeholder-2" class="text-center cursor-pointer no-print" onclick="triggerUpload(2)">
+                                <i data-lucide="image-plus" class="w-8 h-8 text-slate-400 mx-auto mb-1"></i>
+                                <span class="text-[10px] text-slate-500">사진 업로드 (압축 지원)</span>
+                            </div>
+                            <div class="absolute top-1 right-1 flex gap-1 no-print">
+                                <button id="edit-btn-2" onclick="openDrawingEditor(2)" class="bg-blue-600 hover:bg-blue-700 text-white rounded p-1 shadow hidden" title="사진 마크업/선 그리기">
+                                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button id="del-btn-2" onclick="deleteImage(2)" class="bg-rose-600 hover:bg-rose-700 text-white rounded p-1 shadow hidden" title="삭제">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                            <input type="file" id="file-input-2" accept="image/*" class="hidden" onchange="previewImageAndCompress(event, 2)">
+                        </div>
+                        <div class="mt-2 text-[11px]">
+                            <div class="flex items-center gap-1 mb-1 border-b border-slate-200 pb-0.5">
+                                <span class="font-bold text-blue-800 shrink-0">위치:</span>
+                                <input type="text" id="photo-loc-2" value="" class="font-medium !text-left">
+                            </div>
+                            <div class="flex items-start gap-1">
+                                <span class="font-bold text-slate-600 shrink-0">내용:</span>
+                                <textarea id="photo-desc-2" rows="2" class="w-full resize-none !text-left leading-tight"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Photo Card 3 -->
+                    <div id="photo-card-container-3" class="border border-slate-400 flex flex-col justify-between h-[255px] p-2 bg-slate-50 relative group">
+                        <div id="photo-img-box-3" class="w-full h-[165px] border border-dashed border-slate-300 rounded flex flex-col items-center justify-center overflow-hidden bg-white relative">
+                            <img id="img-preview-3" class="w-full h-full object-contain hidden">
+                            <div id="img-placeholder-3" class="text-center cursor-pointer no-print" onclick="triggerUpload(3)">
+                                <i data-lucide="image-plus" class="w-8 h-8 text-slate-400 mx-auto mb-1"></i>
+                                <span class="text-[10px] text-slate-500">사진 업로드 (압축 지원)</span>
+                            </div>
+                            <div class="absolute top-1 right-1 flex gap-1 no-print">
+                                <button id="edit-btn-3" onclick="openDrawingEditor(3)" class="bg-blue-600 hover:bg-blue-700 text-white rounded p-1 shadow hidden" title="사진 마크업/선 그리기">
+                                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button id="del-btn-3" onclick="deleteImage(3)" class="bg-rose-600 hover:bg-rose-700 text-white rounded p-1 shadow hidden" title="삭제">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                            <input type="file" id="file-input-3" accept="image/*" class="hidden" onchange="previewImageAndCompress(event, 3)">
+                        </div>
+                        <div class="mt-2 text-[11px]">
+                            <div class="flex items-center gap-1 mb-1 border-b border-slate-200 pb-0.5">
+                                <span class="font-bold text-blue-800 shrink-0">위치:</span>
+                                <input type="text" id="photo-loc-3" value="" class="font-medium !text-left">
+                            </div>
+                            <div class="flex items-start gap-1">
+                                <span class="font-bold text-slate-600 shrink-0">내용:</span>
+                                <textarea id="photo-desc-3" rows="2" class="w-full resize-none !text-left leading-tight"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Photo Card 4 -->
+                    <div id="photo-card-container-4" class="border border-slate-400 flex flex-col justify-between h-[255px] p-2 bg-slate-50 relative group">
+                        <div id="photo-img-box-4" class="w-full h-[165px] border border-dashed border-slate-300 rounded flex flex-col items-center justify-center overflow-hidden bg-white relative">
+                            <img id="img-preview-4" class="w-full h-full object-contain hidden">
+                            <div id="img-placeholder-4" class="text-center cursor-pointer no-print" onclick="triggerUpload(4)">
+                                <i data-lucide="image-plus" class="w-8 h-8 text-slate-400 mx-auto mb-1"></i>
+                                <span class="text-[10px] text-slate-500">사진 업로드 (압축 지원)</span>
+                            </div>
+                            <div class="absolute top-1 right-1 flex gap-1 no-print">
+                                <button id="edit-btn-4" onclick="openDrawingEditor(4)" class="bg-blue-600 hover:bg-blue-700 text-white rounded p-1 shadow hidden" title="사진 마크업/선 그리기">
+                                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button id="del-btn-4" onclick="deleteImage(4)" class="bg-rose-600 hover:bg-rose-700 text-white rounded p-1 shadow hidden" title="삭제">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                            <input type="file" id="file-input-4" accept="image/*" class="hidden" onchange="previewImageAndCompress(event, 4)">
+                        </div>
+                        <div class="mt-2 text-[11px]">
+                            <div class="flex items-center gap-1 mb-1 border-b border-slate-200 pb-0.5">
+                                <span class="font-bold text-blue-800 shrink-0">위치:</span>
+                                <input type="text" id="photo-loc-4" value="" class="font-medium !text-left">
+                            </div>
+                            <div class="flex items-start gap-1">
+                                <span class="font-bold text-slate-600 shrink-0">내용:</span>
+                                <textarea id="photo-desc-4" rows="2" class="w-full resize-none !text-left leading-tight"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+        </div>
+    </main>
+
+
+    <!-- ================= 2. 모달 창: 이미지 마크업/드로잉 에디터 ================= -->
+    <div id="drawing-modal" class="no-print fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl p-6 flex flex-col h-[90vh]">
+            <div class="flex justify-between items-center border-b pb-3 mb-4 shrink-0">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="paintbrush" class="text-blue-600"></i> 작업 사진 마크업 마스터 툴
+                </h3>
+                <button onclick="closeDrawingEditor()" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="flex-1 flex gap-4 overflow-hidden">
+                <!-- 캔버스 드로잉 보드 -->
+                <div class="flex-1 bg-slate-100 rounded border flex items-center justify-center overflow-auto p-2">
+                    <canvas id="editor-canvas" class="shadow-md bg-white cursor-crosshair"></canvas>
+                </div>
+                <!-- 고급 툴바 패널 -->
+                <div class="w-52 shrink-0 flex flex-col justify-between border-l pl-4">
+                    <div class="flex flex-col gap-4">
+                        <span class="text-xs font-bold text-slate-500">도구 제어판</span>
+                        
+                        <!-- 브러쉬 컬러 선택 -->
+                        <div>
+                            <label class="text-xs font-medium text-slate-600 block mb-1">그리기 색상</label>
+                            <div class="grid grid-cols-4 gap-2">
+                                <button onclick="setPenColor('#ef4444')" class="w-8 h-8 rounded-full bg-red-500 border-2 border-white ring-2 ring-transparent focus:ring-red-500 focus:outline-none"></button>
+                                <button onclick="setPenColor('#3b82f6')" class="w-8 h-8 rounded-full bg-blue-500 border-2 border-white ring-2 ring-transparent focus:ring-blue-500 focus:outline-none"></button>
+                                <button onclick="setPenColor('#eab308')" class="w-8 h-8 rounded-full bg-yellow-500 border-2 border-white ring-2 ring-transparent focus:ring-yellow-500 focus:outline-none"></button>
+                                <button onclick="setPenColor('#10b981')" class="w-8 h-8 rounded-full bg-emerald-500 border-2 border-white ring-2 ring-transparent focus:ring-emerald-500 focus:outline-none"></button>
+                            </div>
+                        </div>
+
+                        <!-- 그리기 모드 전환 -->
+                        <div>
+                            <label class="text-xs font-medium text-slate-600 block mb-1">도구 타입</label>
+                            <div class="grid grid-cols-2 gap-1.5">
+                                <button onclick="setDrawMode('free')" id="tool-free" class="bg-blue-600 text-white text-xs py-1.5 rounded font-semibold">자유 펜</button>
+                                <button onclick="setDrawMode('circle')" id="tool-circle" class="bg-slate-200 hover:bg-slate-300 text-xs py-1.5 rounded">동그라미</button>
+                                <button onclick="setDrawMode('arrow')" id="tool-arrow" class="bg-slate-200 hover:bg-slate-300 text-xs py-1.5 rounded">지정 화살표</button>
+                                <button onclick="setDrawMode('eraser')" id="tool-eraser" class="bg-slate-200 hover:bg-slate-300 text-xs py-1.5 rounded">지우개</button>
+                            </div>
+                        </div>
+
+                        <!-- 펜 크기 -->
+                        <div>
+                            <label class="text-xs font-medium text-slate-600 block mb-1">도구 두께</label>
+                            <input type="range" id="pen-size-range" min="2" max="25" value="4" oninput="setPenWidth(this.value)" class="w-full">
+                        </div>
+
+                        <!-- 히스토리 역순 제어 -->
+                        <div class="pt-2 border-t flex flex-col gap-1.5">
+                            <button onclick="undoLastAction()" class="w-full text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 py-1.5 rounded flex items-center justify-center gap-1">
+                                <i data-lucide="undo" class="w-3.5 h-3.5"></i> 한 단계 되돌리기
+                            </button>
+                            <button onclick="resetEditorImage()" class="w-full text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 py-1.5 rounded flex items-center justify-center gap-1">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> 사진 초기화
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <button onclick="closeDrawingEditor()" class="w-full text-sm bg-slate-200 hover:bg-slate-300 text-slate-700 py-2 rounded">
+                            닫기
+                        </button>
+                        <button onclick="saveDrawingEditor()" class="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white py-2 rounded font-semibold flex items-center justify-center gap-1">
+                            <i data-lucide="check" class="w-4 h-4"></i> 마크업 저장
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 3. 공통 커스텀 컨펌 모달 (alert/confirm 대체용) ================= -->
+    <div id="confirm-modal" class="no-print fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6">
+            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2 mb-3" id="confirm-title">
+                <i data-lucide="help-circle" class="text-amber-500 w-5 h-5"></i> 확인
+            </h3>
+            <p class="text-xs text-slate-600 mb-6 leading-relaxed" id="confirm-message">
+                정말로 실행하시겠습니까?
+            </p>
+            <div class="flex gap-2 justify-end">
+                <button onclick="closeConfirmModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded text-xs font-semibold">
+                    취소
+                </button>
+                <button id="confirm-ok-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-xs font-semibold">
+                    확인
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 4. 데이터베이스 보존 일자 목록 모달 ================= -->
+    <div id="db-list-modal" class="no-print fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="database" class="text-blue-600 w-5 h-5"></i> 저장된 일보 일자 목록
+                </h3>
+                <button onclick="closeDatabaseListModal()" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="db-list-body" class="flex flex-col gap-1 max-h-80 overflow-y-auto text-sm">
+                <!-- JS로 렌더링 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 토스트 알림 메시지 UI -->
+    <div id="toast-message" class="no-print fixed bottom-5 right-5 z-50 bg-slate-900/95 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl transition-all duration-300 transform translate-y-20 opacity-0 flex items-center gap-2 border border-slate-700">
+        <i data-lucide="info" class="w-4 h-4 text-blue-400"></i>
+        <span id="toast-text">알림 메시지</span>
+    </div>
+
+    <script>
+        // ================= 전역 데이터 구조화 =================
+        let activeDate = "2026-06-20"; // 기본 활성화 날짜
+
+        // 기본 템플릿 반환용 함수
+        function createDefaultTemplate(dateStr) {
+            const days = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+            const dateObj = new Date(dateStr);
+            const formattedDate = `${dateStr.substring(0,4)}년 ${dateStr.substring(5,7)}월 ${dateStr.substring(8,10)}일 ${days[isNaN(dateObj.getDay()) ? 6 : dateObj.getDay()]}`;
+
+            return {
+                metadata: {
+                    manager: "김 종남",
+                    projectName: "캠프롱 문화체육공원 조성사업(조경, 토목)",
+                    weather: "맑음",
+                    date: formattedDate,
+                    ratePlanned: "82.29%",
+                    rateActual: "83.31%",
+                    rateCompare: "101.24%",
+                    periodRemain: "60일",
+                    todayWorks: "○ 전체 : 우천 작업 대기\n○ 전체 : 휴일 작업 대기",
+                    tomorrowWorks: "○ 토공 및 관로공 잔여 분할 시공\n○ 조경 식재 준비 및 부지 정비",
+                    safetyMgmt: "TBM(작업 전 안전점검) 실시, 현장 순찰",
+                    envMgmt: "폐콘크리트 성상별 보관 및 세륜기 운행",
+                    photoDate: dateStr,
+                    signature: "",
+                    photoLayout: "grid" // "grid", "list"
+                },
+                materialsLeft: [
+                    { name: "레미콘 (조경+토목)", spec: "25-18-80", unit: "m³", design: "1500", today: "0", prev: "780" },
+                    { name: "레미콘 (조경+토목)", spec: "25-21-80", unit: "m³", design: "5000", today: "0", prev: "3666" },
+                    { name: "레미콘 (조경+토목)", spec: "25-24-12", unit: "m³", design: "100", today: "0", prev: "39" },
+                    { name: "철근 (조경+토목)", spec: "HD13mm", unit: "ton", design: "150", today: "0", prev: "79.359" },
+                    { name: "철근 (조경+토목)", spec: "HD16mm", unit: "ton", design: "50", today: "0", prev: "19.97" },
+                    { name: "아스콘", spec: "표층(WC-2)", unit: "ton", design: "2000", today: "0", prev: "1404" },
+                    { name: "아스콘", spec: "기층(BB-2)", unit: "ton", design: "6000", today: "0", prev: "4535" },
+                    { name: "VR관", spec: "300mm", unit: "본", design: "500", today: "0", prev: "253" },
+                    { name: "VR관", spec: "500mm", unit: "본", design: "400", today: "0", prev: "224" },
+                    { name: "보차도경계석", spec: "200*250*1000", unit: "ea", design: "4500", today: "0", prev: "3067" },
+                    { name: "도로경계석", spec: "150*150*1000", unit: "ea", design: "8000", today: "0", prev: "5664" },
+                    { name: "혼합골재 (조경+토목)", spec: "D75 (토목)", unit: "m³", design: "3000", today: "0", prev: "2023" }
+                ],
+                materialsRight: [
+                    { name: "원형 1호맨홀", spec: "상부구체 29", unit: "ea", design: "100", today: "0", prev: "37" },
+                    { name: "원형 1호맨홀", spec: "하부구체 29", unit: "ea", design: "100", today: "0", prev: "36" },
+                    { name: "원형 3호맨홀", spec: "연직구체 14", unit: "ea", design: "80", today: "0", prev: "27" },
+                    { name: "고강성 PVC관", spec: "D200-6.0m", unit: "본", design: "1000", today: "0", prev: "437" },
+                    { name: "바이오숙부비료", spec: "조경용 20kg", unit: "포", design: "5000", today: "0", prev: "2240" }
+                ],
+                manpower: [
+                    { job: "직원 (공사관리/안전)", today: "4", prev: "4174" },
+                    { job: "반장", today: "0", prev: "583" },
+                    { job: "철근공", today: "0", prev: "202" },
+                    { job: "보통인부", today: "0", prev: "1359" },
+                    { job: "조경공", today: "0", prev: "1063" },
+                    { job: "형틀목공", today: "0", prev: "1853" }
+                ],
+                equipment: [
+                    { name: "B/H 0.3 (백호우)", today: "0", prev: "49" },
+                    { name: "B/H 0.6 / 0.8 / 1.0", today: "0", prev: "1272" },
+                    { name: "D/T 15T / 25T (덤프)", today: "0", prev: "356" }
+                ],
+                waste: [
+                    { name: "혼합폐기물", design: "0", today: "0", prev: "0" },
+                    { name: "폐콘크리트", design: "0", today: "0", prev: "0" },
+                    { name: "폐아스콘", design: "0", today: "0", prev: "0" }
+                ],
+                photos: [
+                    { id: 1, src: "", location: "체육공원 지반 구역", desc: "종합 배수체계 점검 및 유실 구간 실시간 체크" },
+                    { id: 2, src: "", location: "연병장 일대", desc: "우천 배수 가배수로 수로 유도 상태 종합 현장 순찰" },
+                    { id: 3, src: "", location: "자재 적치장", desc: "부자재 반입 내역 수량 품질 검사 및 보호막 피복 상태 확인" },
+                    { id: 4, src: "", location: "진입 도로망", desc: "진입 도로구간 노반 혼합골재 포설 상태 순찰 완료" }
+                ]
+            };
+        }
+
+        // 전체 보고서 데이터셋 저장소
+        let reportDatabase = {
+            "2026-06-20": createDefaultTemplate("2026-06-20")
+        };
+
+        let state = reportDatabase["2026-06-20"];
+
+        // 동적 아이템 생성 구조 선언 (안정성 강화)
+        const defaultMaterial = () => ({ name: "", spec: "", unit: "", design: "0", today: "0", prev: "0" });
+        const defaultManpower = () => ({ job: "", today: "0", prev: "0" });
+        const defaultEquipment = () => ({ name: "", today: "0", prev: "0" });
+        const wasteNames = ["혼합폐기물", "폐콘크리트", "폐아스콘"];
+        const defaultWaste = (idx) => ({ name: wasteNames[idx] || "", design: "0", today: "0", prev: "0" });
+        const defaultPhoto = (idx) => ({ id: idx + 1, src: "", location: "", desc: "" });
+
+        // 리스트 필터 정화 함수
+        function sanitizeList(list, defaultCreator) {
+            if (!Array.isArray(list)) return [];
+            return list.filter(item => item !== null && item !== undefined).map((item, index) => {
+                return { ...defaultCreator(index), ...item };
+            });
+        }
+
+        // ================= 상태 유효성 보장 구조 마스터 =================
+        function ensureStateStructure(obj, dateStr) {
+            if (!obj) return;
+            const defaults = createDefaultTemplate(dateStr || activeDate);
+            
+            if (!obj.metadata) obj.metadata = {};
+            for (let key in defaults.metadata) {
+                if (obj.metadata[key] === undefined || obj.metadata[key] === null) {
+                    obj.metadata[key] = defaults.metadata[key];
+                }
+            }
+
+            obj.materialsLeft = sanitizeList(obj.materialsLeft, defaultMaterial);
+            obj.materialsRight = sanitizeList(obj.materialsRight, defaultMaterial);
+            obj.manpower = sanitizeList(obj.manpower, defaultManpower);
+            obj.equipment = sanitizeList(obj.equipment, defaultEquipment);
+
+            // 폐기물 처리 현황: 항상 3개 고정 품목(혼합폐기물/폐콘크리트/폐아스콘) 유지
+            const cleanedWaste = sanitizeList(obj.waste, defaultWaste);
+            obj.waste = [];
+            for (let i = 0; i < 3; i++) {
+                const existing = cleanedWaste.find(w => w.name === wasteNames[i]) || cleanedWaste[i];
+                obj.waste.push({
+                    name: wasteNames[i],
+                    design: existing ? (existing.design || "0") : "0",
+                    today: existing ? (existing.today || "0") : "0",
+                    prev: existing ? (existing.prev || "0") : "0"
+                });
+            }
+            
+            // 사진 리스트 정밀 보정
+            const cleanedPhotos = sanitizeList(obj.photos, defaultPhoto);
+            obj.photos = [];
+            for (let i = 0; i < 4; i++) {
+                const existing = cleanedPhotos.find(p => p.id === (i + 1)) || cleanedPhotos[i];
+                obj.photos.push({
+                    id: i + 1,
+                    src: existing ? (existing.src || "") : "",
+                    location: existing ? (existing.location || "") : "",
+                    desc: existing ? (existing.desc || "") : ""
+                });
+            }
+        }
+
+        // ================= 초기 로드 =================
+        document.addEventListener("DOMContentLoaded", () => {
+            const picker = document.getElementById("report-date-picker");
+            if(picker) picker.value = activeDate;
+            loadAllDatabase();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            updateLiveDashboard();
+            refreshAllAutoGrowTextareas();
+        });
+
+        // ================= 이력 데이터베이스 통합 관리 및 지능형 자료 연동 =================
+        function loadAllDatabase() {
+            const cachedDb = localStorage.getItem("camprong_smart_report_db_v5");
+            const cachedActiveDate = localStorage.getItem("camprong_active_date_v5");
+
+            if (cachedDb) {
+                try {
+                    reportDatabase = JSON.parse(cachedDb);
+                } catch(e) {
+                    console.error("데이터베이스 로드 오류", e);
+                }
+            }
+
+            if (cachedActiveDate && reportDatabase[cachedActiveDate]) {
+                activeDate = cachedActiveDate;
+            } else {
+                const keys = Object.keys(reportDatabase);
+                if (keys.length > 0) activeDate = keys[0];
+            }
+
+            const picker = document.getElementById("report-date-picker");
+            if(picker) picker.value = activeDate;
+            
+            state = reportDatabase[activeDate];
+            if (!state) {
+                state = createDefaultTemplate(activeDate);
+                reportDatabase[activeDate] = state;
+            }
+
+            ensureStateStructure(state, activeDate);
+            syncDomFromState();
+            updateSavedReportsCount();
+        }
+
+        function updateSavedReportsCount() {
+            const keys = Object.keys(reportDatabase);
+            const counter = document.getElementById("saved-reports-count");
+            if(counter) counter.innerText = keys.length;
+        }
+
+        // ================= 데이터베이스 보존 일자 목록 모달 =================
+        function openDatabaseListModal() {
+            renderDatabaseList();
+            document.getElementById("db-list-modal").classList.remove("hidden");
+        }
+
+        function closeDatabaseListModal() {
+            document.getElementById("db-list-modal").classList.add("hidden");
+        }
+
+        function renderDatabaseList() {
+            const body = document.getElementById("db-list-body");
+            if (!body) return;
+            const keys = Object.keys(reportDatabase).sort().reverse();
+
+            if (keys.length === 0) {
+                body.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">저장된 일보가 없습니다.</p>`;
+                return;
+            }
+
+            body.innerHTML = keys.map(date => {
+                const isActive = date === activeDate;
+                return `
+                    <div class="flex items-center justify-between gap-2 p-2 rounded-lg border ${isActive ? 'bg-blue-50 border-blue-300' : 'border-slate-200 hover:bg-slate-50'}">
+                        <button onclick="jumpToDatabaseDate('${date}')" class="flex-1 text-left flex items-center gap-2">
+                            <i data-lucide="${isActive ? 'check-circle-2' : 'calendar'}" class="w-4 h-4 ${isActive ? 'text-blue-600' : 'text-slate-400'} shrink-0"></i>
+                            <span class="font-semibold ${isActive ? 'text-blue-700' : 'text-slate-700'}">${date}</span>
+                            ${isActive ? '<span class="text-[10px] text-blue-500 font-bold">현재 보기중</span>' : ''}
+                        </button>
+                        <button onclick="deleteDatabaseDate('${date}')" class="text-red-400 hover:text-red-600 p-1 shrink-0" title="삭제">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+            }).join("");
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function jumpToDatabaseDate(date) {
+            const picker = document.getElementById("report-date-picker");
+            if (picker) picker.value = date;
+            changeReportDate();
+            closeDatabaseListModal();
+        }
+
+        function deleteDatabaseDate(date) {
+            const keys = Object.keys(reportDatabase);
+            if (keys.length <= 1) {
+                showToast("최소 1개 일자의 일보는 보존되어야 합니다.");
+                return;
+            }
+            showConfirm(
+                "일보 삭제",
+                `${date} 일보 데이터를 영구적으로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`,
+                () => {
+                    delete reportDatabase[date];
+                    localStorage.setItem("camprong_smart_report_db_v5", JSON.stringify(reportDatabase));
+
+                    if (date === activeDate) {
+                        const remainKeys = Object.keys(reportDatabase).sort().reverse();
+                        activeDate = remainKeys[0];
+                        localStorage.setItem("camprong_active_date_v5", activeDate);
+                        const picker = document.getElementById("report-date-picker");
+                        if (picker) picker.value = activeDate;
+                        state = reportDatabase[activeDate];
+                        ensureStateStructure(state, activeDate);
+                        syncDomFromState();
+                    }
+
+                    updateSavedReportsCount();
+                    renderDatabaseList();
+                    showToast(`${date} 일보가 삭제되었습니다.`);
+                }
+            );
+        }
+
+        // 일보 날짜 변경시 이전 자료 자동 연동 기능 적용
+        function changeReportDate() {
+            const picker = document.getElementById("report-date-picker");
+            if (!picker || !picker.value) return;
+
+            syncStateFromDom();
+            reportDatabase[activeDate] = JSON.parse(JSON.stringify(state));
+
+            const prevDate = activeDate; // 직전 기준일 기록
+            activeDate = picker.value;
+            localStorage.setItem("camprong_active_date_v5", activeDate);
+
+            // 해당 날짜에 데이터가 없을 시, 이전 자료 구조 및 데이터 그대로 복제 연동 (자동 롤오버)
+            if (!reportDatabase[activeDate]) {
+                const sourceState = reportDatabase[prevDate] || state;
+                const cloned = JSON.parse(JSON.stringify(sourceState));
+                
+                // 타겟 일보 날짜 요일 계산 및 텍스트 빌드
+                const days = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+                const dateObj = new Date(activeDate);
+                const formattedDate = `${activeDate.substring(0,4)}년 ${activeDate.substring(5,7)}월 ${activeDate.substring(8,10)}일 ${days[isNaN(dateObj.getDay()) ? 6 : dateObj.getDay()]}`;
+                
+                cloned.metadata.date = formattedDate;
+                cloned.metadata.photoDate = activeDate;
+                
+                // [건설일지 표준 롤오버 연산]: 직전일 누계(전일누계+금일)를 새로운 일보의 전일누계(prev)로 전환하고 금일(today)은 0으로 연계 설정
+                if (cloned.materialsLeft) {
+                    cloned.materialsLeft.forEach(m => {
+                        const prevVal = parseFloat(String(m.prev).replace(/,/g, '')) || 0;
+                        const todayVal = parseFloat(String(m.today).replace(/,/g, '')) || 0;
+                        m.prev = String(prevVal + todayVal);
+                        m.today = "0";
+                    });
+                }
+                if (cloned.materialsRight) {
+                    cloned.materialsRight.forEach(m => {
+                        const prevVal = parseFloat(String(m.prev).replace(/,/g, '')) || 0;
+                        const todayVal = parseFloat(String(m.today).replace(/,/g, '')) || 0;
+                        m.prev = String(prevVal + todayVal);
+                        m.today = "0";
+                    });
+                }
+                if (cloned.manpower) {
+                    cloned.manpower.forEach(m => {
+                        const prevVal = parseFloat(String(m.prev).replace(/,/g, '')) || 0;
+                        const todayVal = parseFloat(String(m.today).replace(/,/g, '')) || 0;
+                        m.prev = String(prevVal + todayVal);
+                        m.today = "0";
+                    });
+                }
+                if (cloned.equipment) {
+                    cloned.equipment.forEach(e => {
+                        const prevVal = parseFloat(String(e.prev).replace(/,/g, '')) || 0;
+                        const todayVal = parseFloat(String(e.today).replace(/,/g, '')) || 0;
+                        e.prev = String(prevVal + todayVal);
+                        e.today = "0";
+                    });
+                }
+                if (cloned.waste) {
+                    cloned.waste.forEach(w => {
+                        const prevVal = parseFloat(String(w.prev).replace(/,/g, '')) || 0;
+                        const todayVal = parseFloat(String(w.today).replace(/,/g, '')) || 0;
+                        w.prev = String(prevVal + todayVal);
+                        w.today = "0";
+                    });
+                }
+
+                reportDatabase[activeDate] = cloned;
+            }
+            
+            state = reportDatabase[activeDate];
+            ensureStateStructure(state, activeDate);
+            syncDomFromState();
+            updateSavedReportsCount();
+            showToast(`${activeDate} 일보로 이동했습니다. (이전 자재/인력 내역 및 누계금액 자동 연계)`);
+        }
+
+        // 신규 날짜 일보 생성시에도 동일하게 이전 자료 연계하여 생성
+        function createNewReportForCurrentDate() {
+            syncStateFromDom();
+            reportDatabase[activeDate] = JSON.parse(JSON.stringify(state));
+
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const formattedToday = `${yyyy}-${mm}-${dd}`;
+
+            if (reportDatabase[formattedToday]) {
+                showToast("오늘 날짜 일보가 이미 존재합니다. 해당 일보로 전환합니다.");
+                activeDate = formattedToday;
+            } else {
+                // 이전 자료 그대로 연동하여 신규 일보 생성
+                const sourceState = reportDatabase[activeDate] || state;
+                const cloned = JSON.parse(JSON.stringify(sourceState));
+                
+                const days = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+                const dateObj = new Date(formattedToday);
+                const formattedDate = `${yyyy}년 ${mm}월 ${dd}일 ${days[isNaN(dateObj.getDay()) ? 6 : dateObj.getDay()]}`;
+                
+                cloned.metadata.date = formattedDate;
+                cloned.metadata.photoDate = formattedToday;
+
+                // 자재 및 인력/장비 누계 전이 롤오버 진행
+                const rollOverItem = (item) => {
+                    const prevVal = parseFloat(String(item.prev).replace(/,/g, '')) || 0;
+                    const todayVal = parseFloat(String(item.today).replace(/,/g, '')) || 0;
+                    item.prev = String(prevVal + todayVal);
+                    item.today = "0";
+                };
+
+                if (cloned.materialsLeft) cloned.materialsLeft.forEach(rollOverItem);
+                if (cloned.materialsRight) cloned.materialsRight.forEach(rollOverItem);
+                if (cloned.manpower) cloned.manpower.forEach(rollOverItem);
+                if (cloned.equipment) cloned.equipment.forEach(rollOverItem);
+                if (cloned.waste) cloned.waste.forEach(rollOverItem);
+
+                reportDatabase[formattedToday] = cloned;
+                activeDate = formattedToday;
+                showToast("이전 일보에서 자재/인력 마스터를 연계 받아 오늘 일보를 생성했습니다.");
+            }
+
+            const picker = document.getElementById("report-date-picker");
+            if(picker) picker.value = activeDate;
+            localStorage.setItem("camprong_active_date_v5", activeDate);
+            state = reportDatabase[activeDate];
+            
+            ensureStateStructure(state, activeDate);
+            syncDomFromState();
+            updateSavedReportsCount();
+        }
+
+        function saveToLocalStorage() {
+            try {
+                syncStateFromDom();
+                reportDatabase[activeDate] = JSON.parse(JSON.stringify(state));
+                
+                localStorage.setItem("camprong_smart_report_db_v5", JSON.stringify(reportDatabase));
+                localStorage.setItem("camprong_active_date_v5", activeDate);
+                
+                showToast("현재 데이터와 모든 날짜별 이력이 로컬 저장소에 저장되었습니다.");
+                updateLiveDashboard();
+            } catch(e) {
+                console.error("데이터베이스 저장 한도 초과", e);
+                showToast("사진 용량이 너무 커 브라우저 한도 초과가 발생했습니다. 사진 해상도를 조절하여 저장하세요.");
+            }
+        }
+
+        function autoSaveToCache() {
+            try {
+                syncStateFromDom();
+                reportDatabase[activeDate] = JSON.parse(JSON.stringify(state));
+                localStorage.setItem("camprong_smart_report_db_v5", JSON.stringify(reportDatabase));
+                updateLiveDashboard();
+            } catch(e) {
+                console.warn("자동 저장 스킵");
+            }
+        }
+
+        // ================= 실시간 모니터링 통계 분석 위젯 =================
+        function updateLiveDashboard() {
+            if (!state) return;
+
+            let totalMan = 0;
+            document.querySelectorAll("#manpower-body tr").forEach((row, i) => {
+                const input = document.getElementById(`man-today-${i}`);
+                if (input) {
+                    totalMan += parseFloat(input.value.replace(/,/g, '')) || 0;
+                }
+            });
+            const dashMan = document.getElementById("dash-manpower-today");
+            if(dashMan) dashMan.innerText = totalMan.toLocaleString();
+
+            let totalEq = 0;
+            document.querySelectorAll("#equipment-body tr").forEach((row, i) => {
+                const input = document.getElementById(`eq-today-${i}`);
+                if (input) {
+                    totalEq += parseFloat(input.value.replace(/,/g, '')) || 0;
+                }
+            });
+            const dashEq = document.getElementById("dash-equipment-today");
+            if(dashEq) dashEq.innerText = totalEq.toLocaleString();
+
+            const compareInput = document.getElementById("rate-compare");
+            const dashComp = document.getElementById("dash-compare-rate");
+            if (compareInput && dashComp) {
+                dashComp.innerText = compareInput.value;
+            }
+
+            const dashMat = document.getElementById("dash-material-count");
+            if(dashMat) {
+                const matCount = (state.materialsLeft ? state.materialsLeft.length : 0) + (state.materialsRight ? state.materialsRight.length : 0);
+                dashMat.innerText = matCount;
+            }
+        }
+
+        // ================= 날씨 프리셋 입력 가이드 =================
+        function setWeatherPreset(presetType) {
+            const todayWorksTextarea = document.getElementById("today-works");
+            const weatherInput = document.getElementById("report-weather");
+            
+            if(weatherInput) weatherInput.value = presetType;
+            
+            if(todayWorksTextarea) {
+                if (presetType === "맑음") {
+                    todayWorksTextarea.value = "○ 공구별 정상 작업 시공 완료\n○ 조경 식재 준비 및 정지작업 진행\n○ 지중 관로 터파기 지반 다짐 진행";
+                } else if (presetType === "우천") {
+                    todayWorksTextarea.value = "○ 전체 : 우천 작업 대기 및 공사 중단\n○ 토공 법면 유실 방지막 천막 피복 작업\n○ 가배수로 정비 및 양수기 비상 가동";
+                } else if (presetType === "강풍") {
+                    todayWorksTextarea.value = "○ 고소작업 및 크레인 인양공사 중단\n○ 가설 방음벽 및 가설 울타리 결속 보강\n○ 지상 노출 적재물 방풍망 고정 조치";
+                }
+            }
+            autoSaveToCache();
+            showToast(`날씨 프리셋(${presetType})에 맞춰 자동 양식이 채워졌습니다.`);
+        }
+
+        // ================= A4 인쇄 가이드라인 및 사진 대지 제어 =================
+        function toggleA4Guidelines() {
+            const guideline = document.getElementById("toggle-guide-line");
+            const page1 = document.getElementById("page-1");
+            if(guideline && page1) {
+                if (guideline.checked) {
+                    page1.classList.add("print-boundary");
+                } else {
+                    page1.classList.remove("print-boundary");
+                }
+            }
+        }
+
+        function toggleDashboardView() {
+            const dashboard = document.getElementById("toggle-dashboard");
+            const dashWidget = document.getElementById("dashboard-widget");
+            if(dashboard && dashWidget) {
+                if (dashboard.checked) {
+                    dashWidget.classList.remove("hidden");
+                } else {
+                    dashWidget.classList.add("hidden");
+                }
+            }
+        }
+
+        function changePhotoLayout(layoutType, saveToCache = false) {
+            if (!state.metadata) state.metadata = {};
+            state.metadata.photoLayout = layoutType;
+            const photoGrid = document.getElementById("photo-grid");
+            const btnGrid = document.getElementById("layout-btn-grid");
+            const btnList = document.getElementById("layout-btn-list");
+
+            if(!photoGrid) return;
+
+            if (layoutType === "grid") {
+                photoGrid.className = "grid grid-cols-2 gap-x-4 gap-y-4";
+                if(btnGrid) btnGrid.className = "bg-blue-600 text-white text-xs px-3 py-1.5 rounded font-bold shadow-sm";
+                if(btnList) btnList.className = "bg-slate-200 text-slate-700 text-xs px-3 py-1.5 rounded font-bold hover:bg-slate-300";
+                
+                for (let i = 1; i <= 4; i++) {
+                    const card = document.getElementById(`photo-card-container-${i}`);
+                    const box = document.getElementById(`photo-img-box-${i}`);
+                    if(card) card.className = "border border-slate-400 flex flex-col justify-between h-[255px] p-2 bg-slate-50 relative group";
+                    if(box) box.className = "w-full h-[165px] border border-dashed border-slate-300 rounded flex flex-col items-center justify-center overflow-hidden bg-white relative";
+                }
+            } else {
+                photoGrid.className = "grid grid-cols-1 gap-y-6";
+                if(btnList) btnList.className = "bg-blue-600 text-white text-xs px-3 py-1.5 rounded font-bold shadow-sm";
+                if(btnGrid) btnGrid.className = "bg-slate-200 text-slate-700 text-xs px-3 py-1.5 rounded font-bold hover:bg-slate-300";
+                
+                for (let i = 1; i <= 4; i++) {
+                    const card = document.getElementById(`photo-card-container-${i}`);
+                    const box = document.getElementById(`photo-img-box-${i}`);
+                    if(card) card.className = "border border-slate-400 flex flex-col justify-between h-[420px] p-4 bg-slate-50 relative group";
+                    if(box) box.className = "w-full h-[300px] border border-dashed border-slate-300 rounded flex flex-col items-center justify-center overflow-hidden bg-white relative";
+                }
+            }
+            if (saveToCache) {
+                autoSaveToCache();
+            }
+        }
+
+        // ================= DOM <-> STATE 양방향 수동 동기화 =================
+        function syncStateFromDom() {
+            if (!state) return;
+            if (!state.metadata) state.metadata = {};
+
+            const mgr = document.getElementById("report-manager");
+            const proj = document.getElementById("report-project-name");
+            const weather = document.getElementById("report-weather");
+            const date = document.getElementById("report-date");
+            const plan = document.getElementById("rate-planned");
+            const actual = document.getElementById("rate-actual");
+            const compare = document.getElementById("rate-compare");
+            const remain = document.getElementById("period-remain");
+            const pdate = document.getElementById("photo-date");
+
+            if(mgr) state.metadata.manager = mgr.value;
+            if(proj) state.metadata.projectName = proj.value;
+            if(weather) state.metadata.weather = weather.value;
+            if(date) state.metadata.date = date.value;
+            if(plan) state.metadata.ratePlanned = plan.value;
+            if(actual) state.metadata.rateActual = actual.value;
+            if(compare) state.metadata.rateCompare = compare.value;
+            if(remain) state.metadata.periodRemain = remain.value;
+            if(pdate) state.metadata.photoDate = pdate.value;
+
+            const tWorks = document.getElementById("today-works");
+            const tmWorks = document.getElementById("tomorrow-works");
+            const safety = document.getElementById("safety-mgmt");
+            const env = document.getElementById("env-mgmt");
+
+            if (tWorks) state.metadata.todayWorks = tWorks.value;
+            if (tmWorks) state.metadata.tomorrowWorks = tmWorks.value;
+            if (safety) state.metadata.safetyMgmt = safety.value;
+            if (env) state.metadata.envMgmt = env.value;
+
+            // 자재 수집 (좌측) - 빈 행 필터링 포함
+            state.materialsLeft = [];
+            document.querySelectorAll("#materials-left-body tr").forEach((row) => {
+                // 패딩 빈 행은 수집에서 제외
+                if (row.classList.contains('padded-empty-row')) return;
+                
+                const nameEl = row.querySelector("td:nth-child(1) input");
+                const specEl = row.querySelector("td:nth-child(2) input");
+                const unitEl = row.querySelector("td:nth-child(3) input");
+                const designEl = row.querySelector("td:nth-child(4) input");
+                const todayEl = row.querySelector("td:nth-child(5) input");
+                const accumEl = row.querySelector("td:nth-child(6) input");
+                
+                if (nameEl && nameEl.value.trim() !== "") {
+                    const todayVal = parseFloat(todayEl ? todayEl.value.replace(/,/g, '') : "0") || 0;
+                    const accumVal = parseFloat(accumEl ? accumEl.value.replace(/,/g, '') : "0") || 0;
+                    const calculatedPrev = Math.max(0, accumVal - todayVal);
+
+                    state.materialsLeft.push({
+                        name: nameEl.value,
+                        spec: specEl ? specEl.value : "",
+                        unit: unitEl ? unitEl.value : "단위",
+                        design: designEl ? designEl.value : "0",
+                        today: todayEl ? todayEl.value : "0",
+                        prev: String(calculatedPrev)
+                    });
+                }
+            });
+
+            // 자재 수집 (우측) - 빈 행 필터링 포함
+            state.materialsRight = [];
+            document.querySelectorAll("#materials-right-body tr").forEach((row) => {
+                if (row.classList.contains('padded-empty-row')) return;
+
+                const nameEl = row.querySelector("td:nth-child(1) input");
+                const specEl = row.querySelector("td:nth-child(2) input");
+                const unitEl = row.querySelector("td:nth-child(3) input");
+                const designEl = row.querySelector("td:nth-child(4) input");
+                const todayEl = row.querySelector("td:nth-child(5) input");
+                const accumEl = row.querySelector("td:nth-child(6) input");
+
+                if (nameEl && nameEl.value.trim() !== "") {
+                    const todayVal = parseFloat(todayEl ? todayEl.value.replace(/,/g, '') : "0") || 0;
+                    const accumVal = parseFloat(accumEl ? accumEl.value.replace(/,/g, '') : "0") || 0;
+                    const calculatedPrev = Math.max(0, accumVal - todayVal);
+
+                    state.materialsRight.push({
+                        name: nameEl.value,
+                        spec: specEl ? specEl.value : "",
+                        unit: unitEl ? unitEl.value : "단위",
+                        design: designEl ? designEl.value : "0",
+                        today: todayEl ? todayEl.value : "0",
+                        prev: String(calculatedPrev)
+                    });
+                }
+            });
+
+            // 인원 수집 - 빈 행 필터링 포함
+            state.manpower = [];
+            document.querySelectorAll("#manpower-body tr").forEach((row) => {
+                if (row.classList.contains('padded-empty-row')) return;
+
+                const jobEl = row.querySelector("td:nth-child(1) input");
+                const todayEl = row.querySelector("td:nth-child(2) input");
+                const accumEl = row.querySelector("td:nth-child(3) input");
+                
+                if (jobEl && jobEl.value.trim() !== "") {
+                    const todayVal = parseFloat(todayEl ? todayEl.value.replace(/,/g, '') : "0") || 0;
+                    const accumVal = parseFloat(accumEl ? accumEl.value.replace(/,/g, '') : "0") || 0;
+                    const calculatedPrev = Math.max(0, accumVal - todayVal);
+
+                    state.manpower.push({
+                        job: jobEl.value,
+                        today: todayEl ? todayEl.value : "0",
+                        prev: String(calculatedPrev)
+                    });
+                }
+            });
+
+            // 장비 수집 - 빈 행 필터링 포함
+            state.equipment = [];
+            document.querySelectorAll("#equipment-body tr").forEach((row) => {
+                if (row.classList.contains('padded-empty-row')) return;
+
+                const nameEl = row.querySelector("td:nth-child(1) input");
+                const todayEl = row.querySelector("td:nth-child(2) input");
+                const accumEl = row.querySelector("td:nth-child(3) input");
+                
+                if (nameEl && nameEl.value.trim() !== "") {
+                    const todayVal = parseFloat(todayEl ? todayEl.value.replace(/,/g, '') : "0") || 0;
+                    const accumVal = parseFloat(accumEl ? accumEl.value.replace(/,/g, '') : "0") || 0;
+                    const calculatedPrev = Math.max(0, accumVal - todayVal);
+
+                    state.equipment.push({
+                        name: nameEl.value,
+                        today: todayEl ? todayEl.value : "0",
+                        prev: String(calculatedPrev)
+                    });
+                }
+            });
+
+            // 폐기물 처리 현황 수집 (고정 3항목)
+            if (!state.waste) state.waste = [];
+            for (let i = 0; i < 3; i++) {
+                const designEl = document.getElementById(`waste-design-${i}`);
+                const todayEl = document.getElementById(`waste-today-${i}`);
+                const accumEl = document.getElementById(`waste-accum-${i}`);
+
+                const todayVal = parseFloat(todayEl ? todayEl.value.replace(/,/g, '') : "0") || 0;
+                const accumVal = parseFloat(accumEl ? accumEl.value.replace(/,/g, '') : "0") || 0;
+                const calculatedPrev = Math.max(0, accumVal - todayVal);
+
+                state.waste[i] = {
+                    name: wasteNames[i],
+                    design: designEl ? designEl.value : "0",
+                    today: todayEl ? todayEl.value : "0",
+                    prev: String(calculatedPrev)
+                };
+            }
+
+            // 사진 내용 수집
+            if (!state.photos) state.photos = [];
+            for(let i=1; i<=4; i++) {
+                const locEl = document.getElementById(`photo-loc-${i}`);
+                const descEl = document.getElementById(`photo-desc-${i}`);
+                if (!state.photos[i-1]) {
+                    state.photos[i-1] = { id: i, src: "", location: "", desc: "" };
+                }
+                if (locEl) state.photos[i-1].location = locEl.value;
+                if (descEl) state.photos[i-1].desc = descEl.value;
+            }
+        }
+
+        function syncDomFromState() {
+            if(!state) return;
+            ensureStateStructure(state, activeDate);
+
+            const mgr = document.getElementById("report-manager");
+            const proj = document.getElementById("report-project-name");
+            const weather = document.getElementById("report-weather");
+            const date = document.getElementById("report-date");
+            const plan = document.getElementById("rate-planned");
+            const actual = document.getElementById("rate-actual");
+            const compare = document.getElementById("rate-compare");
+            const remain = document.getElementById("period-remain");
+            const pdate = document.getElementById("photo-date");
+
+            if(mgr) mgr.value = state.metadata.manager || "";
+            if(proj) proj.value = state.metadata.projectName || "";
+            if(weather) weather.value = state.metadata.weather || "";
+            if(date) date.value = state.metadata.date || "";
+            if(plan) plan.value = state.metadata.ratePlanned || "";
+            if(actual) actual.value = state.metadata.rateActual || "";
+            if(compare) compare.value = state.metadata.rateCompare || "";
+            if(remain) remain.value = state.metadata.periodRemain || "";
+            if(pdate) pdate.value = state.metadata.photoDate || "";
+
+            // 사진대지 레이아웃 복원
+            if (state.metadata.photoLayout) {
+                changePhotoLayout(state.metadata.photoLayout, false);
+            }
+
+            const tWorks = document.getElementById("today-works");
+            const tmWorks = document.getElementById("tomorrow-works");
+            const safety = document.getElementById("safety-mgmt");
+            const env = document.getElementById("env-mgmt");
+
+            if(tWorks) tWorks.value = state.metadata.todayWorks || "";
+            if(tmWorks) tmWorks.value = state.metadata.tomorrowWorks || "";
+            if(safety) safety.value = state.metadata.safetyMgmt || "";
+            if(env) env.value = state.metadata.envMgmt || "";
+            refreshAllAutoGrowTextareas();
+
+            // 좌우 매칭 그리드 크기 자동 보정 계산
+            const maxMaterialsLen = Math.max(state.materialsLeft.length, state.materialsRight.length, 11); // 표준 11줄 이상으로 통일
+            const maxManEqLen = Math.max(state.manpower.length, state.equipment.length, 5); // 표준 5줄 이상으로 통일
+
+            // 테이블 렌더링 (대칭 크기 전송)
+            renderMaterialTable("materials-left-body", state.materialsLeft || [], "left", maxMaterialsLen);
+            renderMaterialTable("materials-right-body", state.materialsRight || [], "right", maxMaterialsLen);
+            renderManpowerTable(state.manpower || [], maxManEqLen);
+            renderEquipmentTable(state.equipment || [], maxManEqLen);
+            renderWasteTable(state.waste || []);
+
+            // 사진 데이터 복원
+            if(state.photos) {
+                state.photos.forEach(p => {
+                    const img = document.getElementById(`img-preview-${p.id}`);
+                    const placeholder = document.getElementById(`img-placeholder-${p.id}`);
+                    const editBtn = document.getElementById(`edit-btn-${p.id}`);
+                    const delBtn = document.getElementById(`del-btn-${p.id}`);
+
+                    const locInput = document.getElementById(`photo-loc-${p.id}`);
+                    const descInput = document.getElementById(`photo-desc-${p.id}`);
+                    if(locInput) locInput.value = p.location || "";
+                    if(descInput) descInput.value = p.desc || "";
+
+                    if (img && placeholder && editBtn && delBtn) {
+                        if (p.src) {
+                            img.src = p.src;
+                            img.classList.remove("hidden");
+                            placeholder.classList.add("hidden");
+                            editBtn.classList.remove("hidden");
+                            delBtn.classList.remove("hidden");
+                        } else {
+                            img.classList.add("hidden");
+                            placeholder.classList.remove("hidden");
+                            editBtn.classList.add("hidden");
+                            delBtn.classList.add("hidden");
+                        }
+                    }
+                });
+            }
+
+            updateLiveDashboard();
+        }
+
+        // ================= 동적 테이블 빌더 (수평 라인 정렬 적용) =================
+        function renderMaterialTable(elementId, list, side, targetLen) {
+            const tbody = document.getElementById(elementId);
+            if(!tbody) return;
+            tbody.innerHTML = "";
+
+            // 1. 실제 데이터 렌더링
+            list.forEach((item, i) => {
+                const tVal = parseFloat(String(item.today).replace(/,/g, '')) || 0;
+                const pVal = parseFloat(String(item.prev).replace(/,/g, '')) || 0;
+                const accumTotal = (tVal + pVal).toLocaleString('ko-KR', {maximumFractionDigits: 3});
+                const designVal = item.design || "0";
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td><input type="text" id="mat-${side}-name-${i}" value="${item.name}" class="text-left font-medium"></td>
+                    <td><input type="text" id="mat-${side}-spec-${i}" value="${item.spec}"></td>
+                    <td><input type="text" id="mat-${side}-unit-${i}" value="${item.unit}" class="text-center"></td>
+                    <td><input type="text" id="mat-${side}-design-${i}" value="${designVal}" class="text-center"></td>
+                    <td><input type="text" id="mat-${side}-today-${i}" value="${item.today}" oninput="autoSumMaterial('${side}', ${i})" class="text-center bg-blue-50/50 font-bold"></td>
+                    <td><input type="text" id="mat-${side}-accum-${i}" value="${accumTotal}" oninput="autoCalcPrevMaterial('${side}', ${i})" class="text-center font-bold bg-slate-50 text-[11px]"></td>
+                    <td class="no-print text-center w-[30px] p-0">
+                        <button onclick="removeRow('${side}', ${i})" class="text-red-500 hover:text-red-700 font-bold text-sm align-middle">
+                            <i data-lucide="minus-square" class="w-4 h-4 mx-auto"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // 2. 대칭 라인 맞춤을 위한 빈 가이드라인 행 패딩 렌더링 (여백 낭비 및 라인 깨짐 자동 보정)
+            for (let i = list.length; i < targetLen; i++) {
+                const tr = document.createElement("tr");
+                tr.className = "padded-empty-row";
+                tr.innerHTML = `
+                    <td><input type="text" id="mat-${side}-name-${i}" value="" placeholder="입력시 자동추가" class="text-left font-medium text-slate-400 focus:text-slate-800"></td>
+                    <td><input type="text" id="mat-${side}-spec-${i}" value=""></td>
+                    <td><input type="text" id="mat-${side}-unit-${i}" value="" class="text-center"></td>
+                    <td><input type="text" id="mat-${side}-design-${i}" value="" class="text-center"></td>
+                    <td><input type="text" id="mat-${side}-today-${i}" value="" oninput="autoSumMaterial('${side}', ${i})" class="text-center"></td>
+                    <td><input type="text" id="mat-${side}-accum-${i}" value="" oninput="autoCalcPrevMaterial('${side}', ${i})" class="text-center font-bold bg-slate-50 text-[11px]"></td>
+                    <td class="no-print text-center w-[30px] p-0"></td>
+                `;
+                tbody.appendChild(tr);
+            }
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function renderManpowerTable(list, targetLen) {
+            const tbody = document.getElementById("manpower-body");
+            if(!tbody) return;
+            tbody.innerHTML = "";
+
+            // 1. 실 데이터 렌더링
+            list.forEach((item, i) => {
+                const tVal = parseFloat(String(item.today).replace(/,/g, '')) || 0;
+                const pVal = parseFloat(String(item.prev).replace(/,/g, '')) || 0;
+                const accumTotal = (tVal + pVal).toLocaleString('ko-KR');
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="title-cell text-left"><input type="text" id="man-job-${i}" value="${item.job}"></td>
+                    <td><input type="text" id="man-today-${i}" value="${item.today}" oninput="autoSumManpower(${i})" class="text-center bg-blue-50/50 font-bold"></td>
+                    <td><input type="text" id="man-accum-${i}" value="${accumTotal}" oninput="autoCalcPrevManpower(${i})" class="text-center font-bold bg-slate-50"></td>
+                    <td class="no-print text-center w-[30px]">
+                        <button onclick="removeManpowerRow(${i})" class="text-red-500 hover:text-red-700">
+                            <i data-lucide="minus-square" class="w-4 h-4 mx-auto"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // 2. 패딩 렌더링
+            for (let i = list.length; i < targetLen; i++) {
+                const tr = document.createElement("tr");
+                tr.className = "padded-empty-row";
+                tr.innerHTML = `
+                    <td class="title-cell text-left"><input type="text" id="man-job-${i}" value="" placeholder="입력시 자동추가" class="text-slate-400 focus:text-slate-800"></td>
+                    <td><input type="text" id="man-today-${i}" value="" oninput="autoSumManpower(${i})" class="text-center"></td>
+                    <td><input type="text" id="man-accum-${i}" value="" oninput="autoCalcPrevManpower(${i})" class="text-center font-bold bg-slate-50"></td>
+                    <td class="no-print text-center w-[30px]"></td>
+                `;
+                tbody.appendChild(tr);
+            }
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function renderEquipmentTable(list, targetLen) {
+            const tbody = document.getElementById("equipment-body");
+            if(!tbody) return;
+            tbody.innerHTML = "";
+
+            // 1. 실 데이터 렌더링
+            list.forEach((item, i) => {
+                const tVal = parseFloat(String(item.today).replace(/,/g, '')) || 0;
+                const pVal = parseFloat(String(item.prev).replace(/,/g, '')) || 0;
+                const accumTotal = (tVal + pVal).toLocaleString('ko-KR');
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="title-cell text-left"><input type="text" id="eq-name-${i}" value="${item.name}"></td>
+                    <td><input type="text" id="eq-today-${i}" value="${item.today}" oninput="autoSumEquipment(${i})" class="text-center bg-blue-50/50 font-bold"></td>
+                    <td><input type="text" id="eq-accum-${i}" value="${accumTotal}" oninput="autoCalcPrevEquipment(${i})" class="text-center font-bold bg-slate-50"></td>
+                    <td class="no-print text-center w-[30px]">
+                        <button onclick="removeEquipmentRow(${i})" class="text-red-500 hover:text-red-700">
+                            <i data-lucide="minus-square" class="w-4 h-4 mx-auto"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // 2. 패딩 렌더링
+            for (let i = list.length; i < targetLen; i++) {
+                const tr = document.createElement("tr");
+                tr.className = "padded-empty-row";
+                tr.innerHTML = `
+                    <td class="title-cell text-left"><input type="text" id="eq-name-${i}" value="" placeholder="입력시 자동추가" class="text-slate-400 focus:text-slate-800"></td>
+                    <td><input type="text" id="eq-today-${i}" value="" oninput="autoSumEquipment(${i})" class="text-center"></td>
+                    <td><input type="text" id="eq-accum-${i}" value="" oninput="autoCalcPrevEquipment(${i})" class="text-center font-bold bg-slate-50"></td>
+                    <td class="no-print text-center w-[30px]"></td>
+                `;
+                tbody.appendChild(tr);
+            }
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        // 폐기물 처리 현황 렌더링 (혼합폐기물/폐콘크리트/폐아스콘 고정 3항목, 품목명은 수정 불가)
+        function renderWasteTable(list) {
+            const tbody = document.getElementById("waste-body");
+            if(!tbody) return;
+            tbody.innerHTML = "";
+
+            list.forEach((item, i) => {
+                const tVal = parseFloat(String(item.today).replace(/,/g, '')) || 0;
+                const pVal = parseFloat(String(item.prev).replace(/,/g, '')) || 0;
+                const accumTotal = (tVal + pVal).toLocaleString('ko-KR', {maximumFractionDigits: 3});
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="title-cell text-left">${item.name}</td>
+                    <td><input type="text" id="waste-design-${i}" value="${item.design || '0'}" class="text-center"></td>
+                    <td><input type="text" id="waste-today-${i}" value="${item.today}" oninput="autoSumWaste(${i})" class="text-center bg-blue-50/50 font-bold"></td>
+                    <td><input type="text" id="waste-accum-${i}" value="${accumTotal}" oninput="autoCalcPrevWaste(${i})" class="text-center font-bold bg-slate-50"></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+        function addRow(side) {
+            try {
+                syncStateFromDom();
+            } catch (e) {
+                console.warn("동기화 예외 무시");
+            }
+            
+            ensureStateStructure(state, activeDate);
+            const targetList = (side === 'left') ? state.materialsLeft : state.materialsRight;
+            if (!targetList) return;
+            
+            targetList.push({ name: "신규 자재", spec: "규격", unit: "단위", design: "0", today: "0", prev: "0" });
+            
+            syncDomFromState();
+            autoSaveToCache();
+            showToast(`${side === 'left' ? '좌측' : '우측'} 자재 목록에 새 행이 성공적으로 추가되었습니다.`);
+        }
+
+        function removeRow(side, index) {
+            try {
+                syncStateFromDom();
+            } catch (e) {
+                console.warn("동기화 예외 무시");
+            }
+            ensureStateStructure(state, activeDate);
+            const targetList = (side === 'left') ? state.materialsLeft : state.materialsRight;
+            if (!targetList) return;
+            targetList.splice(index, 1);
+            syncDomFromState();
+            autoSaveToCache();
+        }
+
+        function addManpowerRow() {
+            try {
+                syncStateFromDom();
+            } catch (e) {
+                console.warn("동기화 예외 무시");
+            }
+            ensureStateStructure(state, activeDate);
+            if (!state.manpower) state.manpower = [];
+            state.manpower.push({ job: "신규 직종", today: "0", prev: "0" });
+            syncDomFromState();
+            autoSaveToCache();
+            showToast("인원 투입 테이블에 새 직종이 추가되었습니다.");
+        }
+
+        function removeManpowerRow(index) {
+            try {
+                syncStateFromDom();
+            } catch (e) {
+                console.warn("동기화 예외 무시");
+            }
+            ensureStateStructure(state, activeDate);
+            if (!state.manpower) return;
+            state.manpower.splice(index, 1);
+            syncDomFromState();
+            autoSaveToCache();
+        }
+
+        function addEquipmentRow() {
+            try {
+                syncStateFromDom();
+            } catch (e) {
+                console.warn("동기화 예외 무시");
+            }
+            ensureStateStructure(state, activeDate);
+            if (!state.equipment) state.equipment = [];
+            state.equipment.push({ name: "신규 장비", today: "0", prev: "0" });
+            syncDomFromState();
+            autoSaveToCache();
+            showToast("장비 가동 테이블에 새 행이 추가되었습니다.");
+        }
+
+        function removeEquipmentRow(index) {
+            try {
+                syncStateFromDom();
+            } catch (e) {
+                console.warn("동기화 예외 무시");
+            }
+            ensureStateStructure(state, activeDate);
+            if (!state.equipment) return;
+            state.equipment.splice(index, 1);
+            syncDomFromState();
+            autoSaveToCache();
+        }
+
+        // ================= 스마트 이미지 업로드 및 강제 리사이징 압축 =================
+        function triggerUpload(id) {
+            document.getElementById(`file-input-${id}`).click();
+        }
+
+        function previewImageAndCompress(event, id) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Src = e.target.result;
+                
+                compressImage(base64Src, 800, 600, 0.75, (compressedBase64) => {
+                    ensureStateStructure(state, activeDate);
+                    if(state.photos && state.photos[id-1]) {
+                        state.photos[id-1].src = compressedBase64;
+                    }
+                    
+                    const imgPreview = document.getElementById(`img-preview-${id}`);
+                    const placeholder = document.getElementById(`img-placeholder-${id}`);
+                    const editBtn = document.getElementById(`edit-btn-${id}`);
+                    const delBtn = document.getElementById(`del-btn-${id}`);
+
+                    if(imgPreview && placeholder && editBtn && delBtn) {
+                        imgPreview.src = compressedBase64;
+                        imgPreview.classList.remove("hidden");
+                        placeholder.classList.add("hidden");
+                        editBtn.classList.remove("hidden");
+                        delBtn.classList.remove("hidden");
+                    }
+
+                    autoSaveToCache();
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function compressImage(base64Str, maxWidth, maxHeight, quality, callback) {
+            const img = new Image();
+            img.src = base64Str;
+            img.onload = function() {
+                const canvas = document.createElement("canvas");
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height *= maxWidth / width;
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width *= maxHeight / height;
+                        height = maxHeight;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                const dataUrl = canvas.toDataURL("image/jpeg", quality);
+                callback(dataUrl);
+            };
+        }
+
+        function deleteImage(id) {
+            ensureStateStructure(state, activeDate);
+            if(state.photos && state.photos[id-1]) {
+                state.photos[id-1].src = "";
+            }
+            syncDomFromState();
+            autoSaveToCache();
+        }
+
+        // ================= 2. 마크업 도구 =================
+        let currentPhotoId = null;
+        let drawingCanvas, drawingCtx;
+        let isDrawing = false;
+        let lastX = 0, lastY = 0;
+        let penColor = "#ef4444";
+        let penWidth = 4;
+        let drawMode = "free";
+        let loadedOriginalImg = null;
+        let drawHistory = [];
+
+        function setDrawMode(mode) {
+            drawMode = mode;
+            const tools = ["free", "circle", "arrow", "eraser"];
+            tools.forEach(t => {
+                const btn = document.getElementById(`tool-${t}`);
+                if (btn) {
+                    if (t === mode) {
+                        btn.className = "bg-blue-600 text-white text-xs py-1.5 rounded font-semibold";
+                    } else {
+                        btn.className = "bg-slate-200 hover:bg-slate-300 text-xs py-1.5 rounded";
+                    }
+                }
+            });
+        }
+
+        function openDrawingEditor(id) {
+            currentPhotoId = id;
+            ensureStateStructure(state, activeDate);
+            if(!state.photos) return;
+            const photo = state.photos[id-1];
+            if (!photo || !photo.src) return;
+
+            document.getElementById("drawing-modal").classList.remove("hidden");
+            drawingCanvas = document.getElementById("editor-canvas");
+            drawingCtx = drawingCanvas.getContext("2d");
+            drawHistory = [];
+
+            loadedOriginalImg = new Image();
+            loadedOriginalImg.src = photo.src;
+            loadedOriginalImg.onload = function() {
+                const maxCanvasW = window.innerWidth * 0.55;
+                const maxCanvasH = window.innerHeight * 0.55;
+                
+                let w = loadedOriginalImg.width;
+                let h = loadedOriginalImg.height;
+
+                if (w > maxCanvasW) {
+                    h *= maxCanvasW / w;
+                    w = maxCanvasW;
+                }
+                if (h > maxCanvasH) {
+                    w *= maxCanvasH / h;
+                    h = maxCanvasH;
+                }
+
+                drawingCanvas.width = w;
+                drawingCanvas.height = h;
+
+                drawingCtx.drawImage(loadedOriginalImg, 0, 0, w, h);
+                saveCanvasState();
+                initDrawingEvents();
+            };
+        }
+
+        function saveCanvasState() {
+            if(!drawingCanvas) return;
+            if (drawHistory.length >= 10) drawHistory.shift();
+            drawHistory.push(drawingCanvas.toDataURL());
+        }
+
+        function undoLastAction() {
+            if(!drawingCtx || !drawingCanvas) return;
+            if (drawHistory.length > 1) {
+                drawHistory.pop();
+                const prevStateSrc = drawHistory[drawHistory.length - 1];
+                
+                const img = new Image();
+                img.src = prevStateSrc;
+                img.onload = function() {
+                    drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+                    drawingCtx.drawImage(img, 0, 0);
+                };
+            } else {
+                showToast("더 이상 되돌릴 상태가 없습니다.");
+            }
+        }
+
+        function initDrawingEvents() {
+            if(!drawingCanvas) return;
+            drawingCanvas.onmousedown = startDrawing;
+            drawingCanvas.onmousemove = draw;
+            drawingCanvas.onmouseup = stopDrawing;
+            drawingCanvas.onmouseout = stopDrawing;
+
+            drawingCanvas.ontouchstart = (e) => {
+                const touch = e.touches[0];
+                startDrawing({
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                e.preventDefault();
+            };
+            drawingCanvas.ontouchmove = (e) => {
+                const touch = e.touches[0];
+                draw({
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                e.preventDefault();
+            };
+            drawingCanvas.ontouchend = (e) => {
+                stopDrawing();
+                e.preventDefault();
+            };
+        }
+
+        let startX = 0;
+        let startY = 0;
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const rect = drawingCanvas.getBoundingClientRect();
+            lastX = e.clientX - rect.left;
+            lastY = e.clientY - rect.top;
+            startX = lastX;
+            startY = lastY;
+        }
+
+        function draw(e) {
+            if (!isDrawing || !drawingCtx) return;
+            const rect = drawingCanvas.getBoundingClientRect();
+            const currentX = e.clientX - rect.left;
+            const currentY = e.clientY - rect.top;
+
+            if (drawMode === "free" || drawMode === "eraser") {
+                drawingCtx.beginPath();
+                drawingCtx.moveTo(lastX, lastY);
+                drawingCtx.lineTo(currentX, currentY);
+                drawingCtx.strokeStyle = (drawMode === "eraser") ? "#ffffff" : penColor;
+                drawingCtx.lineWidth = penWidth * ((drawMode === "eraser") ? 3 : 1);
+                drawingCtx.lineCap = "round";
+                drawingCtx.lineJoin = "round";
+                drawingCtx.stroke();
+                
+                lastX = currentX;
+                lastY = currentY;
+            } else if (drawMode === "circle") {
+                const tempImg = new Image();
+                tempImg.src = drawHistory[drawHistory.length - 1];
+                tempImg.onload = function() {
+                    drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+                    drawingCtx.drawImage(tempImg, 0, 0);
+                    
+                    drawingCtx.beginPath();
+                    const radius = Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
+                    drawingCtx.arc(startX, startY, radius, 0, 2 * Math.PI);
+                    drawingCtx.strokeStyle = penColor;
+                    drawingCtx.lineWidth = penWidth;
+                    drawingCtx.stroke();
+                };
+            } else if (drawMode === "arrow") {
+                const tempImg = new Image();
+                tempImg.src = drawHistory[drawHistory.length - 1];
+                tempImg.onload = function() {
+                    drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+                    drawingCtx.drawImage(tempImg, 0, 0);
+                    drawArrow(startX, startY, currentX, currentY, penColor, penWidth);
+                };
+            }
+        }
+
+        function drawArrow(fromx, fromy, tox, toy, color, width) {
+            const headlen = 12;
+            const angle = Math.atan2(toy - fromy, tox - fromx);
+            
+            drawingCtx.beginPath();
+            drawingCtx.moveTo(fromx, fromy);
+            drawingCtx.lineTo(tox, toy);
+            drawingCtx.strokeStyle = color;
+            drawingCtx.lineWidth = width;
+            drawingCtx.stroke();
+            
+            drawingCtx.beginPath();
+            drawingCtx.moveTo(tox, toy);
+            drawingCtx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+            drawingCtx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+            drawingCtx.fillStyle = color;
+            drawingCtx.fill();
+        }
+
+        function stopDrawing() {
+            if (isDrawing) {
+                isDrawing = false;
+                saveCanvasState();
+            }
+        }
+
+        function setPenColor(color) {
+            penColor = color;
+        }
+
+        function setPenWidth(val) {
+            penWidth = parseInt(val);
+        }
+
+        function resetEditorImage() {
+            if (loadedOriginalImg && drawingCtx) {
+                drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+                drawingCtx.drawImage(loadedOriginalImg, 0, 0, drawingCanvas.width, drawingCanvas.height);
+                saveCanvasState();
+            }
+        }
+
+        function saveDrawingEditor() {
+            if(!drawingCanvas) return;
+            const dataUrl = drawingCanvas.toDataURL("image/jpeg", 0.85);
+            ensureStateStructure(state, activeDate);
+            if(state.photos && state.photos[currentPhotoId-1]) {
+                state.photos[currentPhotoId-1].src = dataUrl;
+            }
+            const imgPreview = document.getElementById(`img-preview-${currentPhotoId}`);
+            if(imgPreview) imgPreview.src = dataUrl;
+            
+            closeDrawingEditor();
+            autoSaveToCache();
+            showToast("사진에 마크업을 적용하여 저장했습니다.");
+        }
+
+        function closeDrawingEditor() {
+            document.getElementById("drawing-modal").classList.add("hidden");
+            isDrawing = false;
+        }
+
+        // ================= 공통 커스텀 컨펌 모달 제어 =================
+        let confirmCallback = null;
+        function showConfirm(title, message, callback) {
+            document.getElementById("confirm-title").innerHTML = `<i data-lucide="help-circle" class="text-amber-500 w-5 h-5 inline-block align-middle mr-1"></i> ${title}`;
+            document.getElementById("confirm-message").innerText = message;
+            confirmCallback = callback;
+            document.getElementById("confirm-modal").classList.remove("hidden");
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+        function closeConfirmModal() {
+            document.getElementById("confirm-modal").classList.add("hidden");
+            confirmCallback = null;
+        }
+        document.getElementById("confirm-ok-btn").addEventListener("click", () => {
+            if (confirmCallback) confirmCallback();
+            closeConfirmModal();
+        });
+
+        // 기본 프리셋 완전 복원 트리거
+        function triggerRestoreDefault() {
+            showConfirm(
+                "기본 데이터 프리셋 복원",
+                "현재 날짜의 작업일보를 표준 시공 프리셋(설계/금일 구조 자재 및 표준 인력)으로 초기화하시겠습니까?\n(입력 중이던 이전 임시 값들이 표준 프리셋 데이터로 복원됩니다.)",
+                () => {
+                    state = createDefaultTemplate(activeDate);
+                    reportDatabase[activeDate] = state;
+                    syncDomFromState();
+                    autoSaveToCache();
+                    showToast("표준 공사 자재 및 인력 프리셋 데이터로 전면 복원되었습니다.");
+                }
+            );
+        }
+
+        // ================= 백업 및 자동 캐싱 메커니즘 =================
+        function exportToJSON() {
+            syncStateFromDom();
+            reportDatabase[activeDate] = JSON.parse(JSON.stringify(state));
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(reportDatabase, null, 2));
+            const downloadAnchor = document.createElement('a');
+            
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `캠프롱_단일현장_작업일보_통합백업.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("전체 날짜 이력이 포함된 통합 백업본이 다운로드되었습니다.");
+        }
+
+        function importFromJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    const keys = Object.keys(parsed);
+                    if (keys.length > 0) {
+                        reportDatabase = parsed;
+                        activeDate = keys[0];
+                        state = reportDatabase[activeDate];
+                        
+                        // 데이터베이스 무결성 복구 보정
+                        for (let k in reportDatabase) {
+                            ensureStateStructure(reportDatabase[k], k);
+                        }
+                        
+                        const picker = document.getElementById("report-date-picker");
+                        if(picker) picker.value = activeDate;
+                        
+                        syncDomFromState();
+                        autoSaveToCache();
+                        updateSavedReportsCount();
+                        showToast("백업본을 안정적으로 복원했습니다.");
+                    } else {
+                        showToast("불러온 JSON 구조가 유효하지 않습니다.");
+                    }
+                } catch(err) {
+                    showToast("파일 복원에 실패했습니다.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ================= CSV 내보내기 =================
+        function exportToCSV() {
+            syncStateFromDom();
+            ensureStateStructure(state, activeDate);
+            let csvContent = "\ufeff";
+
+            csvContent += `공사명,${state.metadata.projectName},날씨,${state.metadata.weather},일자,${state.metadata.date}\r\n`;
+            csvContent += `계획진척률,${state.metadata.ratePlanned},실적진척률,${state.metadata.rateActual},대비율,${state.metadata.rateCompare}\r\n\r\n`;
+
+            csvContent += "■ 자재 투입 정보 (구분,자재명,규격,단위,설계,금일투입,누계)\r\n";
+            state.materialsLeft.forEach(m => {
+                const total = (parseFloat(m.today) || 0) + (parseFloat(m.prev) || 0);
+                csvContent += `좌측자재,${m.name},${m.spec},${m.unit},${m.design || 0},${m.today},${total}\r\n`;
+            });
+            state.materialsRight.forEach(m => {
+                const total = (parseFloat(m.today) || 0) + (parseFloat(m.prev) || 0);
+                csvContent += `우측자재,${m.name},${m.spec},${m.unit},${m.design || 0},${m.today},${total}\r\n`;
+            });
+
+            csvContent += "\r\n";
+
+            csvContent += "■ 인원 투입 정보 (직종,금일투입,누계)\r\n";
+            state.manpower.forEach(m => {
+                const total = (parseFloat(m.today) || 0) + (parseFloat(m.prev) || 0);
+                csvContent += `${m.job},${m.today},${total}\r\n`;
+            });
+
+            csvContent += "\r\n";
+
+            csvContent += "■ 장비 투입 정보 (장비명,금일투입,누계)\r\n";
+            state.equipment.forEach(e => {
+                const total = (parseFloat(e.today) || 0) + (parseFloat(e.prev) || 0);
+                csvContent += `${e.name},${e.today},${total}\r\n`;
+            });
+
+            csvContent += "\r\n";
+
+            csvContent += "■ 폐기물 처리 현황 (품목,설계량,금일,누계)\r\n";
+            (state.waste || []).forEach(w => {
+                const total = (parseFloat(w.today) || 0) + (parseFloat(w.prev) || 0);
+                csvContent += `${w.name},${w.design},${w.today},${total}\r\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            
+            const sanitizedDate = state.metadata.date.replace(/[^a-zA-Z0-9가-힣]/g, '_');
+            link.setAttribute("href", url);
+            link.setAttribute("download", `캠프롱_투입집계_단일현장_${sanitizedDate}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("수치 보고서 데이터가 CSV 파일로 추출되었습니다.");
+        }
+
+        // ================= 계산 및 합산 연산 보조 (양방향 지원) =================
+        function autoSumMaterial(side, i) {
+            const tEl = document.getElementById(`mat-${side}-today-${i}`);
+            const aEl = document.getElementById(`mat-${side}-accum-${i}`);
+            if (!tEl || !aEl) return;
+
+            const targetList = (side === 'left') ? state.materialsLeft : state.materialsRight;
+            const item = targetList[i];
+            const prevVal = parseFloat(String(item ? item.prev : "0").replace(/,/g, '')) || 0;
+            const todayVal = parseFloat(tEl.value.replace(/,/g, '')) || 0;
+
+            const newAccum = prevVal + todayVal;
+            aEl.value = newAccum.toLocaleString('ko-KR', {maximumFractionDigits: 3});
+            updateLiveDashboard();
+        }
+
+        // 누계를 직접 타이핑하여 변경할 때 전일누계를 역산하여 정합성 맞추는 함수
+        function autoCalcPrevMaterial(side, i) {
+            const tEl = document.getElementById(`mat-${side}-today-${i}`);
+            const aEl = document.getElementById(`mat-${side}-accum-${i}`);
+            if (!tEl || !aEl) return;
+
+            const todayVal = parseFloat(tEl.value.replace(/,/g, '')) || 0;
+            const accumVal = parseFloat(aEl.value.replace(/,/g, '')) || 0;
+            let newPrev = accumVal - todayVal;
+            if (newPrev < 0) {
+                newPrev = 0;
+                aEl.value = todayVal.toLocaleString('ko-KR', {maximumFractionDigits: 3});
+                showToast("누계는 금일 투입량보다 작을 수 없어 전일누계를 0으로 보정했습니다.");
+            }
+
+            const targetList = (side === 'left') ? state.materialsLeft : state.materialsRight;
+            if (targetList[i]) {
+                targetList[i].prev = String(newPrev);
+            } else {
+                // 패딩 빈 줄에 새로 타자 칠 경우 실시간 아이템화 및 마스터 데이터 등록 조치
+                const nameEl = document.getElementById(`mat-${side}-name-${i}`);
+                const specEl = document.getElementById(`mat-${side}-spec-${i}`);
+                const unitEl = document.getElementById(`mat-${side}-unit-${i}`);
+                const designEl = document.getElementById(`mat-${side}-design-${i}`);
+                
+                if (nameEl && nameEl.value.trim() !== "") {
+                    targetList[i] = {
+                        name: nameEl.value,
+                        spec: specEl ? specEl.value : "",
+                        unit: unitEl ? unitEl.value : "",
+                        design: designEl ? designEl.value : "0",
+                        today: tEl.value || "0",
+                        prev: String(newPrev)
+                    };
+                }
+            }
+            updateLiveDashboard();
+        }
+
+        function autoSumManpower(i) {
+            const tEl = document.getElementById(`man-today-${i}`);
+            const aEl = document.getElementById(`man-accum-${i}`);
+            if (!tEl || !aEl) return;
+
+            const item = state.manpower[i];
+            const prevVal = parseFloat(String(item ? item.prev : "0").replace(/,/g, '')) || 0;
+            const todayVal = parseFloat(tEl.value.replace(/,/g, '')) || 0;
+
+            aEl.value = (prevVal + todayVal).toLocaleString('ko-KR');
+            updateLiveDashboard();
+        }
+
+        function autoCalcPrevManpower(i) {
+            const tEl = document.getElementById(`man-today-${i}`);
+            const aEl = document.getElementById(`man-accum-${i}`);
+            if (!tEl || !aEl) return;
+
+            const todayVal = parseFloat(tEl.value.replace(/,/g, '')) || 0;
+            const accumVal = parseFloat(aEl.value.replace(/,/g, '')) || 0;
+            let newPrev = accumVal - todayVal;
+            if (newPrev < 0) {
+                newPrev = 0;
+                aEl.value = todayVal.toLocaleString('ko-KR');
+                showToast("누계는 금일 투입량보다 작을 수 없어 전일누계를 0으로 보정했습니다.");
+            }
+
+            if (state.manpower[i]) {
+                state.manpower[i].prev = String(newPrev);
+            } else {
+                const jobEl = document.getElementById(`man-job-${i}`);
+                if (jobEl && jobEl.value.trim() !== "") {
+                    state.manpower[i] = {
+                        job: jobEl.value,
+                        today: tEl.value || "0",
+                        prev: String(newPrev)
+                    };
+                }
+            }
+            updateLiveDashboard();
+        }
+
+        function autoSumEquipment(i) {
+            const tEl = document.getElementById(`eq-today-${i}`);
+            const aEl = document.getElementById(`eq-accum-${i}`);
+            if (!tEl || !aEl) return;
+
+            const item = state.equipment[i];
+            const prevVal = parseFloat(String(item ? item.prev : "0").replace(/,/g, '')) || 0;
+            const todayVal = parseFloat(tEl.value.replace(/,/g, '')) || 0;
+
+            aEl.value = (prevVal + todayVal).toLocaleString('ko-KR');
+            updateLiveDashboard();
+        }
+
+        function autoCalcPrevEquipment(i) {
+            const tEl = document.getElementById(`eq-today-${i}`);
+            const aEl = document.getElementById(`eq-accum-${i}`);
+            if (!tEl || !aEl) return;
+
+            const todayVal = parseFloat(tEl.value.replace(/,/g, '')) || 0;
+            const accumVal = parseFloat(aEl.value.replace(/,/g, '')) || 0;
+            let newPrev = accumVal - todayVal;
+            if (newPrev < 0) {
+                newPrev = 0;
+                aEl.value = todayVal.toLocaleString('ko-KR');
+                showToast("누계는 금일 투입량보다 작을 수 없어 전일누계를 0으로 보정했습니다.");
+            }
+
+            if (state.equipment[i]) {
+                state.equipment[i].prev = String(newPrev);
+            } else {
+                const nameEl = document.getElementById(`eq-name-${i}`);
+                if (nameEl && nameEl.value.trim() !== "") {
+                    state.equipment[i] = {
+                        name: nameEl.value,
+                        today: tEl.value || "0",
+                        prev: String(newPrev)
+                    };
+                }
+            }
+            updateLiveDashboard();
+        }
+
+        // 폐기물 처리 현황 계산 함수 (고정 3항목, 품목명 변경 없음)
+        function autoSumWaste(i) {
+            const tEl = document.getElementById(`waste-today-${i}`);
+            const aEl = document.getElementById(`waste-accum-${i}`);
+            if (!tEl || !aEl || !state.waste || !state.waste[i]) return;
+
+            const prevVal = parseFloat(String(state.waste[i].prev).replace(/,/g, '')) || 0;
+            const todayVal = parseFloat(tEl.value.replace(/,/g, '')) || 0;
+
+            aEl.value = (prevVal + todayVal).toLocaleString('ko-KR', {maximumFractionDigits: 3});
+            updateLiveDashboard();
+        }
+
+        function autoCalcPrevWaste(i) {
+            const tEl = document.getElementById(`waste-today-${i}`);
+            const aEl = document.getElementById(`waste-accum-${i}`);
+            if (!tEl || !aEl || !state.waste || !state.waste[i]) return;
+
+            const todayVal = parseFloat(tEl.value.replace(/,/g, '')) || 0;
+            const accumVal = parseFloat(aEl.value.replace(/,/g, '')) || 0;
+            let newPrev = accumVal - todayVal;
+            if (newPrev < 0) {
+                newPrev = 0;
+                aEl.value = todayVal.toLocaleString('ko-KR', {maximumFractionDigits: 3});
+                showToast("누계는 금일 투입량보다 작을 수 없어 전일누계를 0으로 보정했습니다.");
+            }
+
+            state.waste[i].prev = String(newPrev);
+            updateLiveDashboard();
+        }
+
+        function calculateProgress() {
+            const plannedText = document.getElementById("rate-planned").value;
+            const actualText = document.getElementById("rate-actual").value;
+            
+            const planned = parseFloat(plannedText.replace(/%/g, '')) || 1;
+            const actual = parseFloat(actualText.replace(/%/g, '')) || 0;
+
+            const ratio = ((actual / planned) * 100).toFixed(2);
+            document.getElementById("rate-compare").value = ratio + "%";
+            updateLiveDashboard();
+        }
+
+        // 작업사항 등 텍스트영역 입력 내용에 맞춰 칸 높이를 자동으로 늘리는 함수
+        function autoGrowTextarea(el) {
+            if (!el) return;
+            el.style.height = "auto";
+            el.style.height = el.scrollHeight + "px";
+        }
+
+        // 화면에 존재하는 모든 auto-grow 텍스트영역의 높이를 현재 내용 기준으로 재계산
+        function refreshAllAutoGrowTextareas() {
+            document.querySelectorAll("textarea.auto-grow").forEach(autoGrowTextarea);
+        }
+
+        // 인쇄 전, 각 페이지 콘텐츠가 A4 한 장(297mm) 안에 들어오도록 자동 축소 비율 계산
+        function fitPagesToPrint() {
+            const MM_TO_PX = 96 / 25.4; // 96dpi 기준 mm -> px 환산
+            const frameHeightPx = 297 * MM_TO_PX;
+            const frameWidthPx = 210 * MM_TO_PX;
+
+            document.querySelectorAll(".print-page").forEach(page => {
+                page.style.transform = "none";
+                const renderedHeightPx = page.offsetHeight;
+                const renderedWidthPx = page.offsetWidth;
+
+                const scaleByHeight = frameHeightPx / renderedHeightPx;
+                const scaleByWidth = frameWidthPx / renderedWidthPx;
+                const scale = Math.min(1, scaleByHeight, scaleByWidth);
+
+                page.style.transform = `scale(${scale})`;
+            });
+        }
+
+        window.addEventListener("beforeprint", fitPagesToPrint);
+        window.addEventListener("afterprint", () => {
+            document.querySelectorAll(".print-page").forEach(page => {
+                page.style.transform = "";
+            });
+        });
+
+        // 토스트 알림 메시지 제어
+        function showToast(message) {
+            const toast = document.getElementById("toast-message");
+            const text = document.getElementById("toast-text");
+            if(toast && text) {
+                text.innerText = message;
+                toast.classList.remove("translate-y-20", "opacity-0");
+                toast.classList.add("translate-y-0", "opacity-100");
+
+                if (window.toastTimeout) clearTimeout(window.toastTimeout);
+                window.toastTimeout = setTimeout(() => {
+                    toast.classList.remove("translate-y-0", "opacity-100");
+                    toast.classList.add("translate-y-20", "opacity-0");
+                }, 3000);
+            }
+        }
+    </script>
+</body>
+</html>
