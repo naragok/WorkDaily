@@ -23,53 +23,115 @@
             background-color: #f1f5f9;
         }
 
-        /* ================= 다크모드 (간이 색상 반전 오버라이드) ================= */
+        /* ===================================================
+           다크모드 — 배경/텍스트/테두리를 체계적으로 정의
+           =================================================== */
         body.dark-mode-on {
             background-color: #0f172a;
         }
+        /* A4 페이지 영역 */
         body.dark-mode-on .a4-page {
             background-color: #1e293b !important;
+        }
+        /* 모든 텍스트 계열 */
+        body.dark-mode-on .a4-page,
+        body.dark-mode-on .a4-page span,
+        body.dark-mode-on .a4-page p,
+        body.dark-mode-on .a4-page label,
+        body.dark-mode-on .a4-page div,
+        body.dark-mode-on .a4-page h1,
+        body.dark-mode-on .a4-page h2,
+        body.dark-mode-on .a4-page h3 {
             color: #e2e8f0 !important;
         }
-        body.dark-mode-on input,
-        body.dark-mode-on textarea,
-        body.dark-mode-on select,
-        body.dark-mode-on td,
-        body.dark-mode-on th {
+        /* 테이블 헤더(title-cell) — 원래 어두운 bg 유지, 텍스트 밝게 */
+        body.dark-mode-on .a4-page th,
+        body.dark-mode-on .a4-page .title-cell td {
+            background-color: #334155 !important;
+            color: #f1f5f9 !important;
+            border-color: #475569 !important;
+        }
+        /* 슬레이트 배경 헤더 바(■ 자재투입현황 등) — 색상 유지 */
+        body.dark-mode-on .a4-page .bg-slate-800 {
+            background-color: #0f172a !important;
+            color: #94a3b8 !important;
+        }
+        /* 일반 td */
+        body.dark-mode-on .a4-page td {
             background-color: #1e293b !important;
             color: #e2e8f0 !important;
             border-color: #475569 !important;
         }
-        body.dark-mode-on input::placeholder,
-        body.dark-mode-on textarea::placeholder {
-            color: #64748b !important;
+        /* 누계 칸 배경 */
+        body.dark-mode-on .a4-page .bg-slate-50 {
+            background-color: #0f172a !important;
         }
-        body.dark-mode-on .bg-white,
-        body.dark-mode-on .bg-slate-50,
-        body.dark-mode-on .bg-slate-100 {
-            background-color: #1e293b !important;
+        /* 금일 투입 칸 배경 */
+        body.dark-mode-on .a4-page .bg-blue-50\/50 {
+            background-color: #1e3a5f !important;
         }
-        body.dark-mode-on .text-slate-800,
-        body.dark-mode-on .text-slate-700,
-        body.dark-mode-on .text-slate-600 {
-            color: #cbd5e1 !important;
+        /* 입력칸 — 가장 중요: 배경+글자 모두 명시 */
+        body.dark-mode-on .a4-page input[type="text"],
+        body.dark-mode-on .a4-page input[type="date"],
+        body.dark-mode-on .a4-page input[type="number"],
+        body.dark-mode-on .a4-page textarea,
+        body.dark-mode-on .a4-page select {
+            background-color: transparent !important;
+            color: #e2e8f0 !important;
+            border-color: #475569 !important;
+            caret-color: #e2e8f0 !important;
         }
-        body.dark-mode-on .border,
-        body.dark-mode-on .border-slate-300,
-        body.dark-mode-on .border-slate-400 {
+        body.dark-mode-on .a4-page input::placeholder,
+        body.dark-mode-on .a4-page textarea::placeholder {
+            color: #475569 !important;
+        }
+        /* 테두리 */
+        body.dark-mode-on .a4-page .border,
+        body.dark-mode-on .a4-page .border-slate-300,
+        body.dark-mode-on .a4-page .border-slate-400,
+        body.dark-mode-on .a4-page .border-slate-900 {
             border-color: #475569 !important;
         }
-        /* 모달은 다크모드에서도 가독성 위해 밝은 배경 유지 (헷갈림 방지용 절충) */
-        body.dark-mode-on .fixed.inset-0 .bg-white {
-            background-color: #ffffff !important;
-            color: #1e293b !important;
+        /* 진척률 대비 경고 입력칸 */
+        body.dark-mode-on .a4-page .bg-rose-50,
+        body.dark-mode-on .a4-page .bg-amber-50 {
+            background-color: #1e293b !important;
         }
+        /* 모달은 다크모드에서도 밝은 배경 유지 */
+        body.dark-mode-on .fixed.inset-0 .bg-white { background-color: #ffffff !important; color: #1e293b !important; }
         body.dark-mode-on .fixed.inset-0 input,
         body.dark-mode-on .fixed.inset-0 textarea,
         body.dark-mode-on .fixed.inset-0 select {
-            background-color: #ffffff !important;
-            color: #1e293b !important;
-            border-color: #cbd5e1 !important;
+            background-color: #ffffff !important; color: #1e293b !important; border-color: #cbd5e1 !important;
+        }
+
+        /* ================= 좌/우 분할 화면 레이아웃 ================= */
+        #main-content {
+            min-height: calc(100vh - 120px);
+        }
+        /* 화면: print-frame을 가로로 나란히 */
+        @media screen {
+            .no-print-layout {
+                display: block;
+                overflow-x: auto;
+            }
+            /* A4 페이지를 화면 크기에 맞게 스케일 (각 페이지 210mm 고정) */
+            .print-frame {
+                display: inline-block;
+                vertical-align: top;
+                position: relative;
+                overflow: hidden;
+            }
+            .print-page.a4-page {
+                width: 210mm;
+                min-height: 297mm;
+                background: #ffffff;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+                border-radius: 2px;
+                position: relative;
+                box-sizing: border-box;
+                padding: 8mm 10mm;
+            }
         }
 
         /* ================= 드롭다운 메뉴 ================= */
@@ -82,96 +144,112 @@
         }
 
         @media print {
-            body {
-                background-color: #ffffff;
+            @page {
+                size: A4 portrait;
+                margin: 0mm;
+            }
+
+            /* ── 전체 레이아웃 리셋 ── */
+            html, body {
+                width: 210mm !important;
+                height: 297mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+                overflow: hidden !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print { display: none !important; }
+            #main-content, #main-content > div { display: block !important; padding: 0 !important; margin: 0 !important; }
+
+            /* ── 인쇄 프레임: 정확히 A4 한 장 ── */
+            .print-frame {
+                display: block !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                overflow: hidden !important;
+                page-break-after: always !important;
+                break-after: page !important;
+                position: relative !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
-            .no-print {
-                display: none !important;
-            }
-            /* 기간집계 인쇄 모드: 일보 본문은 숨기고 집계표만 인쇄 */
-            body.stats-print-mode #page-1,
-            body.stats-print-mode #page-2 {
-                display: none !important;
-            }
-            body.stats-print-mode #stats-print-area {
-                display: block !important;
-            }
-            #stats-print-area {
-                display: none;
-            }
-            /* 1페이지 요약본 인쇄 모드 */
-            body.summary-print-mode #page-1,
-            body.summary-print-mode #page-2 {
-                display: none !important;
-            }
-            body.summary-print-mode #summary-print-area {
-                display: block !important;
-            }
-            #summary-print-area {
-                display: none;
-            }
-            /* 인쇄 프레임: 실제 A4 1장 분량의 고정 영역. 내부 콘텐츠는 자동 축소되어 이 영역 안에 항상 맞춰짐 */
-            .print-frame {
-                width: 210mm !important;
-                height: 297mm !important;
-                max-height: 297mm !important;
-                overflow: hidden !important;
-                page-break-after: always !important;
-                box-sizing: border-box !important;
-                position: relative !important;
-                margin: 0 !important;
-            }
             .print-frame:last-child {
                 page-break-after: avoid !important;
+                break-after: avoid !important;
             }
-            /* 인쇄 콘텐츠: 높이 제한 없이 자유롭게 늘어나며, JS가 프레임에 맞춰 축소(scale) 처리 */
+
+            /* ── 인쇄 페이지: transform으로 A4 꽉 채우기 ── */
+            /* JS(fitPagesToPrint)가 scale + translateX 값을 동적으로 설정함 */
             .print-page {
-                box-shadow: none !important;
-                margin: 0 !important;
-                padding: 8mm 10mm !important;
-                width: 210mm !important;
-                height: auto !important;
-                max-height: none !important;
-                overflow: visible !important;
-                box-sizing: border-box !important;
-                display: flex !important;
-                flex-direction: column !important;
-                justify-content: flex-start !important;
-                transform-origin: top left !important;
                 position: absolute !important;
                 top: 0 !important;
                 left: 0 !important;
+                margin: 0 !important;
+                padding: 7mm 9mm !important;
+                width: 210mm !important;
+                box-sizing: border-box !important;
+                box-shadow: none !important;
+                display: flex !important;
+                flex-direction: column !important;
+                transform-origin: top left !important;
+                overflow: visible !important;
             }
-            /* 인쇄 시 선 굵기 및 높이 동일화 */
+
+            /* ── 색상·배경 초기화 (다크모드 포함) ── */
+            .a4-page,
+            .a4-page * {
+                background-color: #fff !important;
+                color: #000 !important;
+                border-color: #000 !important;
+                text-shadow: none !important;
+                box-shadow: none !important;
+            }
+            /* 섹션 헤더 — 흰 배경 + 굵은 글자 + 상하 구분선 */
+            .a4-page .bg-slate-800 {
+                background-color: #fff !important;
+                color: #000 !important;
+                font-weight: 900 !important;
+                border-top: 1pt solid #000 !important;
+                border-bottom: 0.5pt solid #000 !important;
+            }
+            /* 표 헤더 */
+            .a4-page th, .a4-page .title-cell {
+                background-color: #fff !important;
+                font-weight: 700 !important;
+            }
+            /* 셀 */
             th, td {
-                border: 1px solid #000000 !important;
-                height: 21px !important;
-                padding: 1px 3px !important;
-                font-size: 9.5px !important;
+                border: 0.5pt solid #000 !important;
+                height: 20px !important;
+                padding: 1px 2px !important;
+                font-size: 9pt !important;
+                line-height: 1.15 !important;
                 box-sizing: border-box !important;
             }
+            /* 입력칸 */
             input, textarea, select {
-                font-size: 9.5px !important;
-                line-height: 1.1 !important;
-                color: #000000 !important;
+                background: transparent !important;
+                color: #000 !important;
+                font-size: 9pt !important;
+                line-height: 1.15 !important;
             }
-            /* 인쇄 시 빈 칸의 안내문구(placeholder)는 출력되지 않도록 처리 */
-            input::placeholder, textarea::placeholder {
-                color: transparent !important;
-                opacity: 0 !important;
-            }
-            /* 사진대지 인쇄 최적화 */
-            #photo-grid {
-                gap: 8px !important;
-            }
-            .print-page #photo-grid > div {
-                height: 215px !important;
-            }
-            .print-page #photo-grid img {
-                height: 135px !important;
-            }
+            input::placeholder, textarea::placeholder { opacity: 0 !important; }
+
+            /* ── 특수 인쇄 모드 ── */
+            body.stats-print-mode   #page-1, body.stats-print-mode   #page-2 { display: none !important; }
+            body.stats-print-mode   #stats-print-area   { display: block !important; }
+            body.summary-print-mode #page-1, body.summary-print-mode #page-2 { display: none !important; }
+            body.summary-print-mode #summary-print-area { display: block !important; }
+            body.weekly-print-mode  #page-1, body.weekly-print-mode  #page-2 { display: none !important; }
+            body.weekly-print-mode  #weekly-print-area  { display: block !important; }
+            #stats-print-area, #summary-print-area { display: none; }
+
+            /* 사진 그리드 */
+            #photo-grid { gap: 6px !important; }
+            .print-page #photo-grid > div { height: 210px !important; }
+            .print-page #photo-grid img   { height: 130px !important; }
         }
         /* A4 규격 스타일 구조화 */
         .a4-page {
@@ -264,180 +342,180 @@
 </head>
 <body class="text-slate-800">
 
-    <!-- 상단 고정 네비게이션 컨트롤러 (인쇄 시 숨김) -->
-    <header class="no-print sticky top-0 z-40 bg-slate-900 text-white shadow-xl px-6 py-4 flex flex-col gap-3">
-        <div class="flex flex-wrap justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-blue-600 p-2.5 rounded-xl shadow-md shadow-blue-950">
-                    <i data-lucide="building-2" class="w-6 h-6 text-white"></i>
+    <!-- 상단 고정 네비게이션 -->
+    <header class="no-print sticky top-0 z-40 bg-slate-900 text-white shadow-xl">
+        <!-- 1행: 로고 / 현장·날짜 / 저장·상태 -->
+        <div class="flex items-center gap-3 px-4 py-2.5 border-b border-slate-800">
+
+            <!-- 사이드바 토글 -->
+            <button onclick="toggleSidebar()" title="일자 목록" class="text-slate-400 hover:text-white shrink-0">
+                <i data-lucide="panel-left" class="w-5 h-5"></i>
+            </button>
+
+            <!-- 로고 -->
+            <div class="flex items-center gap-2 shrink-0">
+                <div class="bg-blue-600 p-1.5 rounded-lg">
+                    <i data-lucide="building-2" class="w-4 h-4 text-white"></i>
                 </div>
-                <div>
-                    <h1 class="text-lg font-black tracking-tight text-white flex items-center gap-2">작업일보 프로그램</h1>
-                    <p class="text-xs text-slate-400">통합 단일 현장 관리 / 인쇄 시 좌우 대칭 격자라인 자동 매칭 및 페이지 칼맞춤</p>
+                <span class="text-sm font-black text-white hidden sm:block">작업일보</span>
+            </div>
+
+            <div class="w-px h-5 bg-slate-700 shrink-0"></div>
+
+            <!-- 현장 선택 -->
+            <div class="flex items-center gap-1.5 shrink-0">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
+                <select id="site-selector" onchange="onSiteSelectorChange()" class="text-white bg-transparent text-xs outline-none max-w-[140px]"></select>
+                <button onclick="addNewSite()" title="현장 추가" class="text-slate-400 hover:text-emerald-400"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button>
+                <button onclick="renameCurrentSite()" title="이름 변경" class="text-slate-400 hover:text-amber-400"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                <button onclick="deleteCurrentSite()" title="현장 삭제" class="text-slate-400 hover:text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            </div>
+
+            <div class="w-px h-5 bg-slate-700 shrink-0"></div>
+
+            <!-- 날짜 선택 + 일자 작업 -->
+            <div class="flex items-center gap-1.5 shrink-0">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-400 shrink-0"></i>
+                <input type="date" id="report-date-picker" onchange="changeReportDate()" class="text-white !bg-transparent text-xs w-30 cursor-pointer outline-none">
+                <!-- 일자 작업 팝업 -->
+                <div class="relative dropdown-menu-wrapper">
+                    <button onclick="toggleMenu('menu-date-inline')" title="일자 작업" class="text-slate-400 hover:text-blue-400">
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <div id="menu-date-inline" class="dropdown-menu-panel hidden absolute left-0 top-full mt-1.5 bg-white text-slate-700 rounded-lg shadow-2xl border border-slate-200 py-1.5 w-64 z-50">
+                        <button onclick="createNewReportForCurrentDate(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="calendar-plus" class="w-3.5 h-3.5 text-blue-600"></i> 새 날짜 일보 생성</button>
+                        <button onclick="cloneFromPreviousDay(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="copy-plus" class="w-3.5 h-3.5 text-cyan-600"></i> 전일 복제 (투입량 초기화)</button>
+                        <button onclick="openCopyItemsModal(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="copy" class="w-3.5 h-3.5 text-teal-600"></i> 이전 항목 선택 불러오기</button>
+                        <div class="border-t my-1"></div>
+                        <button onclick="openFavoriteSetsModal(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="star" class="w-3.5 h-3.5 text-fuchsia-600"></i> 즐겨찾기 세트 적용</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- 핵심 액션 + 메뉴 그룹 -->
-            <div class="flex items-center gap-2 flex-wrap">
-                <button onclick="saveToLocalStorage()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
-                    <i data-lucide="save" class="w-4 h-4"></i> 작성중 저장
-                </button>
+            <!-- 저장된 일자 수 (사이드바 토글) -->
+            <button onclick="toggleSidebar()" class="text-slate-400 hover:text-emerald-400 flex items-center gap-1 text-[10px] shrink-0" title="일자 목록 사이드바">
+                <i data-lucide="list" class="w-3.5 h-3.5"></i>
+                <span id="saved-reports-count" class="text-emerald-400 font-bold">1</span>개
+            </button>
 
-                <!-- 인쇄/내보내기 메뉴 -->
-                <div class="relative dropdown-menu-wrapper">
-                    <button onclick="toggleMenu('menu-print')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
-                        <i data-lucide="printer" class="w-4 h-4"></i> 인쇄/내보내기 <i data-lucide="chevron-down" class="w-3 h-3"></i>
-                    </button>
-                    <div id="menu-print" class="dropdown-menu-panel hidden absolute left-0 top-full mt-1.5 bg-white text-slate-700 rounded-lg shadow-2xl border border-slate-200 py-1.5 w-56 z-50">
-                        <button onclick="fitPagesToPrint(); window.print(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="printer" class="w-3.5 h-3.5 text-blue-600"></i> A4 인쇄</button>
-                        <button onclick="exportToPDF(); closeAllMenus();" id="pdf-export-btn" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="file-down" class="w-3.5 h-3.5 text-rose-600"></i> PDF 파일로 저장</button>
-                        <button onclick="printOnePageSummary(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="file-text" class="w-3.5 h-3.5 text-emerald-600"></i> 요약본(1장) 인쇄</button>
-                        <button onclick="exportToCSV(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-amber-600"></i> 엑셀용 CSV 내보내기</button>
-                    </div>
-                </div>
+            <!-- 잠금 -->
+            <button id="lock-toggle-btn" onclick="toggleReportLock()" class="text-slate-400 hover:text-amber-400 shrink-0" title="결재 잠금">
+                <i data-lucide="lock-open" class="w-4 h-4"></i>
+            </button>
 
-                <!-- 백업/가져오기 메뉴 -->
-                <div class="relative dropdown-menu-wrapper">
-                    <button onclick="toggleMenu('menu-backup')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
-                        <i data-lucide="database" class="w-4 h-4"></i> 백업/가져오기 <i data-lucide="chevron-down" class="w-3 h-3"></i>
-                    </button>
-                    <div id="menu-backup" class="dropdown-menu-panel hidden absolute left-0 top-full mt-1.5 bg-white text-slate-700 rounded-lg shadow-2xl border border-slate-200 py-1.5 w-64 z-50">
-                        <button onclick="exportToJSON(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="download" class="w-3.5 h-3.5 text-indigo-600"></i> 현재 현장 백업(JSON) 저장</button>
-                        <label class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2 cursor-pointer">
-                            <i data-lucide="upload" class="w-3.5 h-3.5 text-slate-600"></i> 현재 현장 백업 열기
-                            <input type="file" id="json-file" accept=".json" class="hidden" onchange="importFromJSON(event); closeAllMenus();">
-                        </label>
-                        <div class="border-t my-1"></div>
-                        <button onclick="exportAllSitesToJSON(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2" title="모든 현장 데이터를 한 파일로 백업"><i data-lucide="archive" class="w-3.5 h-3.5 text-slate-600"></i> 전체 현장 백업</button>
-                        <label class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2 cursor-pointer" title="전체 현장 백업 파일 복원">
-                            <i data-lucide="archive-restore" class="w-3.5 h-3.5 text-slate-600"></i> 전체 현장 복원
-                            <input type="file" id="json-allsites-file" accept=".json" class="hidden" onchange="importAllSitesFromJSON(event); closeAllMenus();">
-                        </label>
-                        <div class="border-t my-1"></div>
-                        <label class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2 cursor-pointer" title="외부 엑셀 인력투입표(직종/금일인원 등)를 업로드하여 자동으로 등록">
-                            <i data-lucide="file-up" class="w-3.5 h-3.5 text-green-600"></i> 외부 엑셀 가져오기
-                            <input type="file" id="excel-import-file" accept=".xlsx,.xls" class="hidden" onchange="importFromExcel(event); closeAllMenus();">
-                        </label>
-                    </div>
-                </div>
+            <div class="flex-1"></div>
 
-                <!-- 분석/점검 메뉴 -->
-                <div class="relative dropdown-menu-wrapper">
-                    <button onclick="toggleMenu('menu-analysis')" class="bg-purple-700 hover:bg-purple-600 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
-                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i> 분석/점검 <i data-lucide="chevron-down" class="w-3 h-3"></i>
-                    </button>
-                    <div id="menu-analysis" class="dropdown-menu-panel hidden absolute left-0 top-full mt-1.5 bg-white text-slate-700 rounded-lg shadow-2xl border border-slate-200 py-1.5 w-60 z-50">
-                        <button onclick="openPeriodStatsModal(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-3.5 h-3.5 text-indigo-600"></i> 기간 집계 (엑셀/인쇄)</button>
-                        <button onclick="openSiteComparisonModal(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="git-compare" class="w-3.5 h-3.5 text-purple-600"></i> 현장 간 비교</button>
-                        <button onclick="openMaterialTrendModal(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="trending-up" class="w-3.5 h-3.5 text-sky-600"></i> 자재 사용 추이</button>
-                        <button onclick="openPhotoTimelapseModal(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="images" class="w-3.5 h-3.5 text-teal-600"></i> 사진 타임랩스</button>
-                        <div class="border-t my-1"></div>
-                        <button onclick="openPreSubmitCheckModal(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="list-checks" class="w-3.5 h-3.5 text-orange-600"></i> 제출 전 점검</button>
-                        <button onclick="openMissingDatesModal(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="calendar-x" class="w-3.5 h-3.5 text-rose-600"></i> 미작성 일자 점검</button>
-                    </div>
-                </div>
+            <!-- 저장 버튼 (항상 노출) -->
+            <button onclick="saveToLocalStorage()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 shrink-0">
+                <i data-lucide="save" class="w-3.5 h-3.5"></i> 저장
+                <span class="text-[9px] text-emerald-200 hidden sm:block">Ctrl+S</span>
+            </button>
 
-                <!-- 도구 메뉴 -->
-                <div class="relative dropdown-menu-wrapper">
-                    <button onclick="toggleMenu('menu-tools')" class="bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
-                        <i data-lucide="wrench" class="w-4 h-4"></i> 도구 <i data-lucide="chevron-down" class="w-3 h-3"></i>
-                    </button>
-                    <div id="menu-tools" class="dropdown-menu-panel hidden absolute right-0 top-full mt-1.5 bg-white text-slate-700 rounded-lg shadow-2xl border border-slate-200 py-1.5 w-64 z-50">
-                        <button onclick="openFavoriteSetsModal(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="star" class="w-3.5 h-3.5 text-fuchsia-600"></i> 즐겨찾기 세트</button>
-                        <button onclick="undoLastAction(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2" title="Ctrl+Z"><i data-lucide="undo-2" class="w-3.5 h-3.5 text-slate-600"></i> 실행취소 <span class="ml-auto text-[10px] text-slate-400">Ctrl+Z</span></button>
-                        <button onclick="toggleQuickMemo(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="sticky-note" class="w-3.5 h-3.5 text-yellow-600"></i> 빠른메모 (휘발성)</button>
-                        <button onclick="openReminderSettingsModal(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="bell" class="w-3.5 h-3.5 text-indigo-600"></i> 작성 알림 설정</button>
-                        <div class="border-t my-1"></div>
-                        <div class="px-3 py-2 flex items-center justify-between text-xs">
-                            <span class="flex items-center gap-2"><i data-lucide="moon" class="w-3.5 h-3.5 text-slate-600"></i> 다크모드</span>
-                            <button onclick="toggleDarkMode()" id="darkmode-toggle-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold px-2 py-1 rounded">전환</button>
-                        </div>
-                        <div class="px-3 py-2 flex items-center justify-between text-xs">
-                            <span class="flex items-center gap-2"><i data-lucide="type" class="w-3.5 h-3.5 text-slate-600"></i> 글자 크기</span>
-                            <div class="flex items-center gap-1">
-                                <button onclick="adjustFontScale(-10)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold px-1.5 py-1 rounded">A-</button>
-                                <span id="font-scale-label" class="text-[10px] text-slate-500 w-8 text-center">100%</span>
-                                <button onclick="adjustFontScale(10)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold px-1.5 py-1 rounded">A+</button>
-                            </div>
-                        </div>
-                        <div class="border-t my-1"></div>
-                        <button onclick="triggerRestoreDefault(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-amber-600"></i> 기본 데이터 프리셋 복원</button>
-                        <button onclick="triggerFactoryReset(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-red-50 text-red-600 flex items-center gap-2"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> 전체 초기화</button>
-                    </div>
+            <!-- 상태 표시 -->
+            <div id="storage-gauge" title="저장공간 사용량" class="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded border border-slate-700 text-[10px] text-slate-300 shrink-0">
+                <i data-lucide="hard-drive" class="w-3 h-3 text-slate-400"></i>
+                <div class="w-10 h-1 bg-slate-700 rounded-full overflow-hidden">
+                    <div id="storage-gauge-bar" class="h-full bg-emerald-500" style="width:0%"></div>
                 </div>
-
-                <div id="storage-gauge" title="브라우저 저장공간(localStorage) 사용량" class="flex items-center gap-1.5 bg-slate-800 px-2.5 py-2 rounded-lg border border-slate-700 text-[10px] text-slate-300">
-                    <i data-lucide="hard-drive" class="w-3.5 h-3.5 text-slate-400"></i>
-                    <div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                        <div id="storage-gauge-bar" class="h-full bg-emerald-500" style="width:0%"></div>
-                    </div>
-                    <span id="storage-gauge-text">0%</span>
-                </div>
-                <div id="online-status" title="네트워크 연결 상태" class="flex items-center gap-1.5 bg-slate-800 px-2.5 py-2 rounded-lg border border-slate-700 text-[10px]">
-                    <i id="online-status-icon" data-lucide="wifi" class="w-3.5 h-3.5 text-emerald-400"></i>
-                    <span id="online-status-text" class="text-slate-300">온라인</span>
-                </div>
+                <span id="storage-gauge-text" class="hidden sm:block">0%</span>
+            </div>
+            <div id="online-status" title="네트워크 연결 상태" class="shrink-0">
+                <i id="online-status-icon" data-lucide="wifi" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span id="online-status-text" class="hidden"></span>
             </div>
         </div>
 
-        <!-- 2층 컨트롤러: 현장/날짜 관리 -->
-        <div class="border-t border-slate-800 pt-3 flex flex-wrap justify-between items-center gap-4">
-            <div class="flex items-center gap-3 flex-wrap">
-                <!-- 현장 선택기 -->
-                <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-sm">
-                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-400"></i>
-                    <select id="site-selector" onchange="onSiteSelectorChange()" class="text-white bg-slate-800 text-xs outline-none max-w-[180px]"></select>
-                    <button onclick="addNewSite()" title="새 현장 추가" class="text-emerald-400 hover:text-emerald-300">
-                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                    </button>
-                    <button onclick="renameCurrentSite()" title="현재 현장 이름변경" class="text-amber-400 hover:text-amber-300">
-                        <i data-lucide="pencil" class="w-4 h-4"></i>
-                    </button>
-                    <button onclick="deleteCurrentSite()" title="현재 현장 삭제" class="text-red-400 hover:text-red-300">
-                        <i data-lucide="trash" class="w-4 h-4"></i>
-                    </button>
-                </div>
+        <!-- 2행: 3개 메뉴 -->
+        <div class="flex items-center gap-2 px-4 py-1.5">
 
-                <!-- 날짜 선택기 -->
-                <div class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-sm">
-                    <span class="text-slate-400 font-bold text-xs">일보 날짜:</span>
-                    <input type="date" id="report-date-picker" onchange="changeReportDate()" class="text-white !bg-transparent text-sm w-36 cursor-pointer outline-none">
-                </div>
-
-                <div onclick="openDatabaseListModal()" class="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 px-2 py-1.5 rounded-lg text-xs border border-slate-700 cursor-pointer transition" title="저장된 일자 목록 확인">
-                    <span class="text-slate-400">데이터베이스 보존수:</span>
-                    <span id="saved-reports-count" class="font-bold text-emerald-400">1</span>개 일자
-                    <i data-lucide="list" class="w-3.5 h-3.5 text-slate-400"></i>
-                </div>
-
-                <!-- 일자 작업 메뉴 -->
-                <div class="relative dropdown-menu-wrapper">
-                    <button onclick="toggleMenu('menu-date-actions')" class="bg-blue-700 hover:bg-blue-600 text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1">
-                        <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i> 일자 작업 <i data-lucide="chevron-down" class="w-3 h-3"></i>
-                    </button>
-                    <div id="menu-date-actions" class="dropdown-menu-panel hidden absolute left-0 top-full mt-1.5 bg-white text-slate-700 rounded-lg shadow-2xl border border-slate-200 py-1.5 w-72 z-50">
-                        <button onclick="createNewReportForCurrentDate(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="calendar-plus" class="w-3.5 h-3.5 text-blue-600"></i> 새 날짜 일보 생성 (전일 자동연동)</button>
-                        <button onclick="openCopyItemsModal(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="copy" class="w-3.5 h-3.5 text-teal-600"></i> 이전 일보 항목 불러오기</button>
-                        <button onclick="cloneFromPreviousDay(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2" title="전일 일보 전체를 복제하고 금일 투입량만 0으로 초기화"><i data-lucide="copy-plus" class="w-3.5 h-3.5 text-cyan-600"></i> 전일 복제 (전체)</button>
-                    </div>
-                </div>
-
-                <!-- 결재 완료 잠금 -->
-                <button id="lock-toggle-btn" onclick="toggleReportLock()" class="bg-slate-600 hover:bg-slate-500 text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1">
-                    <i data-lucide="lock-open" class="w-3.5 h-3.5"></i> <span id="lock-toggle-label">잠금</span>
+            <!-- ① 출력 -->
+            <div class="relative dropdown-menu-wrapper">
+                <button onclick="toggleMenu('menu-print')" class="text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1 px-2 py-1 rounded hover:bg-slate-800">
+                    <i data-lucide="printer" class="w-3.5 h-3.5"></i> 출력 <i data-lucide="chevron-down" class="w-3 h-3"></i>
                 </button>
+                <div id="menu-print" class="dropdown-menu-panel hidden absolute left-0 top-full mt-1 bg-white text-slate-700 rounded-lg shadow-2xl border border-slate-200 py-1.5 w-52 z-50">
+                    <button onclick="openPrintPreview(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="eye" class="w-3.5 h-3.5 text-blue-500"></i> 인쇄 미리보기</button>
+                    <button onclick="fitPagesToPrint(); window.print(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="printer" class="w-3.5 h-3.5 text-slate-600"></i> A4 인쇄</button>
+                    <button onclick="exportToPDF(); closeAllMenus();" id="pdf-export-btn" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="file-down" class="w-3.5 h-3.5 text-rose-500"></i> PDF 저장</button>
+                    <div class="border-t my-1"></div>
+                    <button onclick="printOnePageSummary(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="file-text" class="w-3.5 h-3.5 text-emerald-600"></i> 요약본 인쇄 (1장)</button>
+                    <button onclick="printWeeklyReport(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="calendar-range" class="w-3.5 h-3.5 text-blue-500"></i> 주간보고서 인쇄</button>
+                    <button onclick="exportToCSV(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-amber-500"></i> CSV 내보내기</button>
+                </div>
             </div>
 
-            <div class="flex items-center gap-4 text-xs">
-                <label class="flex items-center gap-2 cursor-pointer text-slate-300">
-                    <input type="checkbox" id="toggle-guide-line" onchange="toggleA4Guidelines()" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500">
-                    인쇄 경계선 표시
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer text-slate-300">
-                    <input type="checkbox" id="toggle-dashboard" onchange="toggleDashboardView()" checked class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500">
-                    실시간 대시보드 표시
-                </label>
+            <div class="w-px h-4 bg-slate-700"></div>
+
+            <!-- ② 데이터 (백업+분석+점검 통합) -->
+            <div class="relative dropdown-menu-wrapper">
+                <button onclick="toggleMenu('menu-data')" class="text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1 px-2 py-1 rounded hover:bg-slate-800">
+                    <i data-lucide="database" class="w-3.5 h-3.5"></i> 데이터 <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                </button>
+                <div id="menu-data" class="dropdown-menu-panel hidden absolute left-0 top-full mt-1 bg-white text-slate-700 rounded-lg shadow-2xl border border-slate-200 py-1.5 w-60 z-50">
+                    <p class="px-3 py-0.5 text-[10px] text-slate-400 font-bold uppercase">백업</p>
+                    <button onclick="exportToJSON(); closeAllMenus();" class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="download" class="w-3.5 h-3.5 text-indigo-500"></i> 현장 백업 저장</button>
+                    <label class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 flex items-center gap-2 cursor-pointer"><i data-lucide="upload" class="w-3.5 h-3.5 text-slate-500"></i> 현장 백업 열기<input type="file" id="json-file" accept=".json" class="hidden" onchange="importFromJSON(event); closeAllMenus();"></label>
+                    <button onclick="exportAllSitesToJSON(); closeAllMenus();" class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="archive" class="w-3.5 h-3.5 text-slate-500"></i> 전체 현장 백업</button>
+                    <label class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 flex items-center gap-2 cursor-pointer"><i data-lucide="archive-restore" class="w-3.5 h-3.5 text-slate-500"></i> 전체 현장 복원<input type="file" id="json-allsites-file" accept=".json" class="hidden" onchange="importAllSitesFromJSON(event); closeAllMenus();"></label>
+                    <label class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 flex items-center gap-2 cursor-pointer"><i data-lucide="file-up" class="w-3.5 h-3.5 text-green-600"></i> 엑셀 가져오기<input type="file" id="excel-import-file" accept=".xlsx,.xls" class="hidden" onchange="importFromExcel(event); closeAllMenus();"></label>
+                    <div class="border-t my-1"></div>
+                    <p class="px-3 py-0.5 text-[10px] text-slate-400 font-bold uppercase">분석</p>
+                    <button onclick="openPeriodStatsModal(); closeAllMenus();" class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-3.5 h-3.5 text-indigo-500"></i> 기간 집계</button>
+                    <button onclick="openWeeklyReportModal(); closeAllMenus();" class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="calendar-range" class="w-3.5 h-3.5 text-blue-500"></i> 주간 보고서</button>
+                    <button onclick="openSiteComparisonModal(); closeAllMenus();" class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="git-compare" class="w-3.5 h-3.5 text-purple-500"></i> 현장 간 비교</button>
+                    <button onclick="openMaterialTrendModal(); closeAllMenus();" class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="trending-up" class="w-3.5 h-3.5 text-sky-500"></i> 자재 사용 추이</button>
+                    <button onclick="openPhotoTimelapseModal(); closeAllMenus();" class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="images" class="w-3.5 h-3.5 text-teal-500"></i> 사진 타임랩스</button>
+                    <div class="border-t my-1"></div>
+                    <p class="px-3 py-0.5 text-[10px] text-slate-400 font-bold uppercase">점검</p>
+                    <button onclick="openPreSubmitCheckModal(); closeAllMenus();" class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="list-checks" class="w-3.5 h-3.5 text-orange-500"></i> 제출 전 점검</button>
+                    <button onclick="openMissingDatesModal(); closeAllMenus();" class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="calendar-x" class="w-3.5 h-3.5 text-rose-500"></i> 미작성 일자 점검</button>
+                </div>
             </div>
+
+            <div class="w-px h-4 bg-slate-700"></div>
+
+            <!-- ③ 설정 -->
+            <div class="relative dropdown-menu-wrapper">
+                <button onclick="toggleMenu('menu-settings')" class="text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1 px-2 py-1 rounded hover:bg-slate-800">
+                    <i data-lucide="settings" class="w-3.5 h-3.5"></i> 설정 <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                </button>
+                <div id="menu-settings" class="dropdown-menu-panel hidden absolute left-0 top-full mt-1 bg-white text-slate-700 rounded-lg shadow-2xl border border-slate-200 py-1.5 w-56 z-50">
+                    <p class="px-3 py-0.5 text-[10px] text-slate-400 font-bold uppercase">화면</p>
+                    <div class="px-3 py-1.5 flex items-center justify-between text-xs">
+                        <span class="flex items-center gap-1.5"><i data-lucide="moon" class="w-3.5 h-3.5 text-slate-500"></i> 다크모드</span>
+                        <button onclick="toggleDarkMode()" id="darkmode-toggle-btn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded">전환</button>
+                    </div>
+                    <div class="px-3 py-1.5 flex items-center justify-between text-xs">
+                        <span class="flex items-center gap-1.5"><i data-lucide="type" class="w-3.5 h-3.5 text-slate-500"></i> 글자 크기</span>
+                        <div class="flex items-center gap-1">
+                            <button onclick="adjustFontScale(-10)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold w-6 h-5 rounded">A-</button>
+                            <span id="font-scale-label" class="text-[10px] text-slate-500 w-8 text-center">100%</span>
+                            <button onclick="adjustFontScale(10)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold w-6 h-5 rounded">A+</button>
+                        </div>
+                    </div>
+                    <div class="px-3 py-1.5 flex items-center justify-between text-xs">
+                        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="toggle-guide-line" onchange="toggleA4Guidelines()" class="w-3.5 h-3.5"> 인쇄 경계선</label>
+                        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" id="toggle-dashboard" onchange="toggleDashboardView()" checked class="w-3.5 h-3.5"> 대시보드</label>
+                    </div>
+                    <div class="border-t my-1"></div>
+                    <p class="px-3 py-0.5 text-[10px] text-slate-400 font-bold uppercase">기타</p>
+                    <button onclick="undoLastAction(); closeAllMenus();" class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="undo-2" class="w-3.5 h-3.5 text-slate-500"></i> 실행취소 <span class="ml-auto text-[10px] text-slate-400">Ctrl+Z</span></button>
+                    <button onclick="toggleQuickMemo(); closeAllMenus();" class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="sticky-note" class="w-3.5 h-3.5 text-yellow-500"></i> 빠른메모</button>
+                    <button onclick="openReminderSettingsModal(); closeAllMenus();" class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="bell" class="w-3.5 h-3.5 text-indigo-500"></i> 작성 알림</button>
+                    <div class="border-t my-1"></div>
+                    <button onclick="triggerRestoreDefault(); closeAllMenus();" class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-100 flex items-center gap-2"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-amber-500"></i> 프리셋 복원</button>
+                    <button onclick="triggerFactoryReset(); closeAllMenus();" class="w-full text-left px-3 py-1.5 text-xs hover:bg-red-50 text-red-600 flex items-center gap-2"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> 전체 초기화</button>
+                </div>
+            </div>
+
+            <div class="flex-1"></div>
+
+            <!-- 실행취소 빠른 접근 -->
+            <button onclick="undoLastAction()" title="실행취소 (Ctrl+Z)" class="text-slate-400 hover:text-white">
+                <i data-lucide="undo-2" class="w-4 h-4"></i>
+            </button>
+            <!-- 잠금 상태 텍스트 표시 -->
+            <span id="lock-toggle-label" class="text-[10px] text-slate-500 hidden"></span>
         </div>
     </header>
 
@@ -498,9 +576,53 @@
     </section>
 
     <!-- 메인 콘텐츠 영역 -->
-    <main class="container mx-auto py-8 px-4 flex flex-col gap-8 items-center">
-        
-        <!-- ================= PAGE 1: 작업일보 ================= -->
+    <!-- ================= 사이드바 + 메인 레이아웃 ================= -->
+    <div class="flex relative" id="app-layout">
+
+        <!-- 사이드바: 일자 목록 슬라이드 패널 -->
+        <aside id="date-sidebar" class="no-print fixed top-0 left-0 h-full z-30 flex transition-all duration-300" style="width:0; overflow:hidden;">
+            <!-- 패널 본체 -->
+            <div class="w-64 h-full bg-slate-900 border-r border-slate-700 flex flex-col shadow-2xl overflow-hidden">
+                <!-- 사이드바 헤더 -->
+                <div class="flex items-center justify-between px-3 py-3 border-b border-slate-700 shrink-0">
+                    <span class="text-white font-bold text-sm flex items-center gap-1.5">
+                        <i data-lucide="calendar-days" class="w-4 h-4 text-blue-400"></i>
+                        일자 목록
+                    </span>
+                    <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <!-- 검색 -->
+                <div class="px-2 py-2 border-b border-slate-700 shrink-0">
+                    <input type="text" id="sidebar-search" oninput="renderSidebarList()" placeholder="날짜 검색 (예: 06-)" class="w-full bg-slate-800 text-white text-xs px-2 py-1.5 rounded border border-slate-600 outline-none focus:border-blue-500 placeholder-slate-500">
+                </div>
+                <!-- 저장 일자 수 -->
+                <div class="px-3 py-1.5 text-[10px] text-slate-400 border-b border-slate-700 shrink-0 flex justify-between">
+                    <span id="sidebar-total-count">0개 일자</span>
+                    <button onclick="createNewReportForCurrentDate(); renderSidebarList();" class="text-blue-400 hover:text-blue-300 font-bold flex items-center gap-0.5">
+                        <i data-lucide="plus" class="w-3 h-3"></i> 새 일보
+                    </button>
+                </div>
+                <!-- 날짜 목록 -->
+                <div id="sidebar-date-list" class="flex-1 overflow-y-auto py-1"></div>
+            </div>
+        </aside>
+
+        <!-- 사이드바 열기 버튼 (헤더 왼쪽 고정) -->
+        <button onclick="toggleSidebar()" id="sidebar-toggle-btn" class="no-print fixed left-0 z-30 bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-r-lg shadow-lg transition-all duration-300" style="top: 50%; transform: translateY(-50%);" title="일자 목록 사이드바">
+            <i data-lucide="panel-left" class="w-4 h-4"></i>
+        </button>
+
+        <!-- 사이드바 오버레이 (클릭 시 닫기) -->
+        <div id="sidebar-overlay" onclick="toggleSidebar()" class="no-print fixed inset-0 bg-black/40 z-20 hidden"></div>
+
+    <main class="no-print-layout py-6 px-4" id="main-content" style="transition: margin-left 0.3s;">
+
+        <!-- ================= 좌/우 분할 뷰 ================= -->
+        <div class="flex gap-6 items-start justify-center">
+
+        <!-- ── 좌: PAGE 1 (작업일보 본문) ── -->
         <div class="print-frame" id="frame-1">
         <section class="print-page a4-page flex flex-col justify-between" id="page-1">
             <div class="lock-banner no-print" style="display:none; align-items:center; gap:6px; background:#fef3c7; color:#92400e; font-size:11px; font-weight:700; padding:6px 10px; border-radius:6px; margin-bottom:8px;">
@@ -599,123 +721,101 @@
                     </div>
                 </div>
 
-                <!-- 섹션 타이틀: 자재 투입 현황 -->
-                <div class="bg-slate-800 text-white text-[11px] font-bold py-1 px-2 mb-1 flex justify-between items-center">
-                    <span>■ 자재 투입 현황 (자재명 / 규격 / 단위 / 설계 / 금일 / 누계)</span>
-                    <span class="text-[9px] font-light text-slate-300 no-print">좌우 격자 선높이가 정밀하게 자동 매칭 처리됩니다.</span>
-                </div>
-
-                <!-- 자재 투입 현황 테이블 (2분할 레이아웃) -->
-                <div class="grid grid-cols-2 gap-0 border border-slate-900 mb-3">
-                    <!-- 좌측 자재 테이블 -->
-                    <div>
-                        <table class="border-none">
-                            <thead>
-                                <tr class="title-cell">
-                                    <th class="border-t-0 border-l-0 w-[24%] text-[10px]">자재명</th>
-                                    <th class="border-t-0 w-[18%] text-[10px]">규격</th>
-                                    <th class="border-t-0 w-[8%] text-[10px]">단위</th>
-                                    <th class="border-t-0 w-[13%] text-[10px]">설계</th>
-                                    <th class="border-t-0 w-[13%] text-[10px]">금일</th>
-                                    <th class="border-t-0 w-[16%] text-[10px]">누계</th>
-                                    <th class="border-t-0 border-r-0 w-[8%] text-[10px] no-print">관리</th>
-                                </tr>
-                            </thead>
-                            <tbody id="materials-left-body">
-                                <!-- JS로 렌더링 됩니다. -->
-                            </tbody>
-                        </table>
-                        <div class="p-1 text-center no-print border-t border-slate-900">
-                            <button onclick="addRow('left')" class="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center justify-center gap-1 mx-auto">
-                                <i data-lucide="plus-circle" class="w-4 h-4"></i> 좌측 자재 행 추가
+                <!-- 자재 투입 현황 -->
+                <div class="border border-slate-900 mb-3">
+                    <div class="bg-slate-800 text-white text-[11px] font-bold py-1 px-2 flex justify-between items-center">
+                        <span>■ 자재 투입 현황 (자재명 / 규격 / 단위 / 설계 / 금일 / 누계)</span>
+                        <div class="flex items-center gap-3 no-print">
+                            <button onclick="addRow('left')" class="text-[10px] text-blue-300 hover:text-white font-bold flex items-center gap-0.5">
+                                <i data-lucide="plus" class="w-3 h-3"></i> 좌측 추가
+                            </button>
+                            <button onclick="addRow('right')" class="text-[10px] text-emerald-300 hover:text-white font-bold flex items-center gap-0.5">
+                                <i data-lucide="plus" class="w-3 h-3"></i> 우측 추가
                             </button>
                         </div>
                     </div>
-                    <!-- 우측 자재 테이블 -->
-                    <div class="border-l border-slate-950">
-                        <table class="border-none">
-                            <thead>
-                                <tr class="title-cell">
-                                    <th class="border-t-0 border-l-0 w-[24%] text-[10px]">자재명</th>
-                                    <th class="border-t-0 w-[18%] text-[10px]">규격</th>
-                                    <th class="border-t-0 w-[8%] text-[10px]">단위</th>
-                                    <th class="border-t-0 w-[13%] text-[10px]">설계</th>
-                                    <th class="border-t-0 w-[13%] text-[10px]">금일</th>
-                                    <th class="border-t-0 w-[16%] text-[10px]">누계</th>
-                                    <th class="border-t-0 border-r-0 w-[8%] text-[10px] no-print">관리</th>
-                                </tr>
-                            </thead>
-                            <tbody id="materials-right-body">
-                                <!-- JS로 렌더링 됩니다. -->
-                            </tbody>
-                        </table>
-                        <div class="p-1 text-center no-print border-t border-slate-900">
-                            <button onclick="addRow('right')" class="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center justify-center gap-1 mx-auto">
-                                <i data-lucide="plus-circle" class="w-4 h-4"></i> 우측 자재 행 추가
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 인원 및 장비 / 환경 안전 요약 2분할 -->
-                <div class="grid grid-cols-2 gap-4">
-                    <!-- 인원 투입 현황 -->
-                    <div>
-                        <div class="bg-slate-800 text-white text-[11px] font-bold py-1 px-2 mb-1 flex justify-between items-center">
-                            <span>■ 인원 투입 현황</span>
-                            <button onclick="addManpowerRow()" class="text-[10px] text-blue-400 hover:text-white font-bold flex items-center gap-1 no-print">
-                                <i data-lucide="plus" class="w-3 h-3"></i> 인원 행 추가
-                            </button>
-                        </div>
-                        <table class="text-center">
-                            <thead>
-                                <tr class="title-cell">
-                                    <th class="w-[45%]">직종</th>
-                                    <th class="w-[20%]">금일</th>
-                                    <th class="w-[25%]">누계</th>
-                                    <th class="w-[10%] no-print">관리</th>
-                                </tr>
-                            </thead>
-                            <tbody id="manpower-body">
-                                <!-- JS로 인원 데이터 렌더링 -->
-                            </tbody>
-                        </table>
-
-                        <!-- 폐기물 처리 현황 -->
-                        <div class="bg-slate-800 text-white text-[11px] font-bold py-1 px-2 mb-1 mt-3">
-                            ■ 폐기물 처리 현황
-                        </div>
-                        <table class="text-center">
-                            <thead>
-                                <tr class="title-cell">
-                                    <th class="w-[34%]">품목</th>
-                                    <th class="w-[22%]">설계량</th>
-                                    <th class="w-[22%]">금일</th>
-                                    <th class="w-[22%]">누계</th>
-                                </tr>
-                            </thead>
-                            <tbody id="waste-body">
-                                <!-- JS로 폐기물 데이터 렌더링 -->
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- 장비 및 안전/환경 관리 사항 -->
-                    <div class="flex flex-col gap-2">
-                        <div>
-                            <div class="bg-slate-800 text-white text-[11px] font-bold py-1 px-2 mb-1 flex justify-between items-center">
-                                <span>■ 장비 투입 현황</span>
-                                <button onclick="addEquipmentRow()" class="text-[10px] text-blue-400 hover:text-white font-bold flex items-center gap-1 no-print">
-                                    <i data-lucide="plus" class="w-3 h-3"></i> 장비 행 추가
-                                </button>
-                            </div>
-                            <table class="text-center">
+                    <!-- 자재 좌/우 단일 테이블 (인원·장비와 동일한 나란히 2열 구조) -->
+                    <div class="grid grid-cols-2 gap-0">
+                        <div class="border-r border-slate-900">
+                            <table class="border-none w-full">
                                 <thead>
                                     <tr class="title-cell">
-                                        <th class="w-[45%]">장비명</th>
+                                        <th class="border-t-0 border-l-0 w-[25%] text-[10px]">자재명</th>
+                                        <th class="border-t-0 w-[18%] text-[10px]">규격</th>
+                                        <th class="border-t-0 w-[8%] text-[10px]">단위</th>
+                                        <th class="border-t-0 w-[13%] text-[10px]">설계</th>
+                                        <th class="border-t-0 w-[13%] text-[10px]">금일</th>
+                                        <th class="border-t-0 w-[15%] text-[10px]">누계</th>
+                                        <th class="border-t-0 border-r-0 w-[8%] text-[10px] no-print">관리</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="materials-left-body"></tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <table class="border-none w-full">
+                                <thead>
+                                    <tr class="title-cell">
+                                        <th class="border-t-0 border-l-0 w-[25%] text-[10px]">자재명</th>
+                                        <th class="border-t-0 w-[18%] text-[10px]">규격</th>
+                                        <th class="border-t-0 w-[8%] text-[10px]">단위</th>
+                                        <th class="border-t-0 w-[13%] text-[10px]">설계</th>
+                                        <th class="border-t-0 w-[13%] text-[10px]">금일</th>
+                                        <th class="border-t-0 w-[15%] text-[10px]">누계</th>
+                                        <th class="border-t-0 border-r-0 w-[8%] text-[10px] no-print">관리</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="materials-right-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 인원/장비 나란히, 그 아래 폐기물/안전환경 나란히 -->
+                <div class="flex flex-col gap-0">
+
+                    <!-- ① 인원 + 장비 : 나란히 2열 -->
+                    <div class="grid grid-cols-2 gap-0 border border-slate-300">
+                        <!-- 좌: 인원 투입 현황 -->
+                        <div class="border-r border-slate-300">
+                            <div class="bg-slate-800 text-white text-[11px] font-bold py-1 px-2 flex justify-between items-center">
+                                <span>■ 인원 투입 현황 (직종 / 금일 / 누계)</span>
+                                <div class="flex gap-2 no-print">
+                                    <button onclick="addManpowerRow('left')" class="text-[10px] text-blue-300 hover:text-white font-bold flex items-center gap-0.5"><i data-lucide="plus" class="w-3 h-3"></i>좌</button>
+                                    <button onclick="addManpowerRow('right')" class="text-[10px] text-emerald-300 hover:text-white font-bold flex items-center gap-0.5"><i data-lucide="plus" class="w-3 h-3"></i>우</button>
+                                </div>
+                            </div>
+                            <table class="text-center w-full">
+                                <thead>
+                                    <tr class="title-cell">
+                                        <th class="w-[40%]">직종</th>
                                         <th class="w-[20%]">금일</th>
                                         <th class="w-[25%]">누계</th>
-                                        <th class="w-[10%] no-print">관리</th>
+                                        <th class="w-[15%] no-print">관리</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="manpower-body">
+                                    <!-- JS로 인원 데이터 렌더링 -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 우: 장비 투입 현황 -->
+                        <div>
+                            <div class="bg-slate-800 text-white text-[11px] font-bold py-1 px-2 flex justify-between items-center">
+                                <span>■ 장비 투입 현황 (장비명 / 금일 / 누계)</span>
+                                <div class="flex gap-2 no-print">
+                                    <button onclick="addEquipmentRow('left')" class="text-[10px] text-blue-300 hover:text-white font-bold flex items-center gap-0.5"><i data-lucide="plus" class="w-3 h-3"></i>좌</button>
+                                    <button onclick="addEquipmentRow('right')" class="text-[10px] text-emerald-300 hover:text-white font-bold flex items-center gap-0.5"><i data-lucide="plus" class="w-3 h-3"></i>우</button>
+                                </div>
+                            </div>
+                            <table class="text-center w-full">
+                                <thead>
+                                    <tr class="title-cell">
+                                        <th class="w-[40%]">장비명</th>
+                                        <th class="w-[20%]">금일</th>
+                                        <th class="w-[25%]">누계</th>
+                                        <th class="w-[15%] no-print">관리</th>
                                     </tr>
                                 </thead>
                                 <tbody id="equipment-body">
@@ -723,36 +823,60 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
 
+                    <!-- ② 폐기물 + 안전·환경 : 나란히 2열 -->
+                    <div class="grid grid-cols-2 gap-0 border-x border-b border-slate-300">
+                        <!-- 좌: 폐기물 처리 현황 -->
+                        <div class="border-r border-slate-300">
+                            <div class="bg-slate-800 text-white text-[11px] font-bold py-1 px-2">
+                                ■ 폐기물 처리 현황
+                            </div>
+                            <table class="text-center w-full">
+                                <thead>
+                                    <tr class="title-cell">
+                                        <th class="w-[34%]">품목</th>
+                                        <th class="w-[22%]">설계량</th>
+                                        <th class="w-[22%]">금일</th>
+                                        <th class="w-[22%]">누계</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="waste-body">
+                                    <!-- JS로 폐기물 데이터 렌더링 -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- 우: 안전 및 환경 관리 -->
                         <div>
-                            <div class="bg-slate-800 text-white text-[11px] font-bold py-1 px-2 mb-1">
+                            <div class="bg-slate-800 text-white text-[11px] font-bold py-1 px-2">
                                 ■ 안전 및 환경 관리
                             </div>
-                            <table class="text-left">
+                            <table class="text-left w-full">
                                 <tbody>
                                     <tr>
-                                        <td class="title-cell w-[30%] text-center">안전관리</td>
-                                        <td>
-                                            <input type="text" id="safety-mgmt" value="TBM(작업 전 안전점검) 실시, 현장 순찰" class="text-left font-medium">
-                                        </td>
+                                        <td class="title-cell w-[22%] text-center">안전관리</td>
+                                        <td><input type="text" id="safety-mgmt" value="TBM(작업 전 안전점검) 실시, 현장 순찰" class="text-left font-medium"></td>
                                     </tr>
                                     <tr>
                                         <td class="title-cell text-center">환경관리</td>
-                                        <td>
-                                            <input type="text" id="env-mgmt" value="폐콘크리트 성상별 보관 및 세륜기 운행" class="text-left font-medium">
-                                        </td>
+                                        <td><input type="text" id="env-mgmt" value="폐콘크리트 성상별 보관 및 세륜기 운행" class="text-left font-medium"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="title-cell text-center">특이사항</td>
+                                        <td><input type="text" id="special-note" value="" placeholder="특이사항 입력" class="text-left font-medium"></td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
+
                 </div>
             </div>
 
         </section>
-        </div>
+        </div><!-- /frame-1 (좌) -->
 
-        <!-- ================= PAGE 2: 사진대지 ================= -->
+        <!-- ── 우: PAGE 2 (사진대지) ── -->
         <div class="print-frame" id="frame-2">
         <section class="print-page a4-page flex flex-col justify-between" id="page-2">
             <div>
@@ -976,8 +1100,12 @@
             </div>
 
         </section>
-        </div>
+        </div><!-- /frame-2 (우) -->
+
+        </div><!-- /.flex 좌우 분할 -->
+
     </main>
+    </div><!-- /#app-layout -->
 
 
     <!-- ================= 2. 모달 창: 이미지 마크업/드로잉 에디터 ================= -->
@@ -1031,7 +1159,7 @@
 
                         <!-- 히스토리 역순 제어 -->
                         <div class="pt-2 border-t flex flex-col gap-1.5">
-                            <button onclick="undoLastAction()" class="w-full text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 py-1.5 rounded flex items-center justify-center gap-1">
+                            <button onclick="undoDrawingAction()" class="w-full text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 py-1.5 rounded flex items-center justify-center gap-1">
                                 <i data-lucide="undo" class="w-3.5 h-3.5"></i> 한 단계 되돌리기
                             </button>
                             <button onclick="resetEditorImage()" class="w-full text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 py-1.5 rounded flex items-center justify-center gap-1">
@@ -1300,6 +1428,69 @@
         </div>
     </div>
 
+    <!-- 주간 보고서 모달 -->
+    <div id="weekly-report-modal" class="no-print fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-5 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-3 border-b pb-2 shrink-0">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                    <i data-lucide="calendar-range" class="w-4 h-4 text-blue-600"></i>
+                    주간 보고서 자동 생성
+                </h3>
+                <button onclick="document.getElementById('weekly-report-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <!-- 주 선택 -->
+            <div class="flex items-center gap-2 mb-3 text-xs shrink-0">
+                <button onclick="shiftWeek(-1)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1.5 rounded font-bold">◀</button>
+                <div class="flex items-center gap-1">
+                    <span id="weekly-range-label" class="font-bold text-slate-700 w-52 text-center"></span>
+                </div>
+                <button onclick="shiftWeek(1)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1.5 rounded font-bold">▶</button>
+                <button onclick="setWeekToThis()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-2 py-1.5 rounded font-bold">이번 주</button>
+                <button onclick="generateWeeklyReport()" class="ml-auto bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded font-bold flex items-center gap-1">
+                    <i data-lucide="file-text" class="w-3.5 h-3.5"></i> 생성
+                </button>
+                <button onclick="printWeeklyReport()" class="bg-slate-600 hover:bg-slate-700 text-white px-3 py-1.5 rounded font-bold flex items-center gap-1">
+                    <i data-lucide="printer" class="w-3.5 h-3.5"></i> 인쇄
+                </button>
+            </div>
+
+            <!-- 결과 영역 -->
+            <div id="weekly-report-body" class="overflow-y-auto flex-1 text-xs">
+                <p class="text-slate-400 text-center py-10">주를 선택하고 "생성" 버튼을 눌러주세요.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 주간 보고서 인쇄 전용 영역 -->
+    <div id="weekly-print-area" class="p-10" style="display:none;">
+        <div id="weekly-print-body"></div>
+    </div>
+
+    <!-- 인쇄 미리보기 모달 -->
+    <div id="print-preview-modal" class="no-print fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-start justify-center overflow-y-auto hidden py-8">
+        <div class="bg-slate-800 rounded-xl shadow-2xl w-full max-w-5xl mx-4">
+            <div class="flex items-center justify-between px-5 py-3 border-b border-slate-700">
+                <h3 class="font-bold text-white flex items-center gap-2">
+                    <i data-lucide="eye" class="w-4 h-4 text-blue-400"></i> 인쇄 미리보기
+                    <span id="preview-page-info" class="text-slate-400 text-xs font-normal ml-2"></span>
+                </h3>
+                <div class="flex items-center gap-2">
+                    <button onclick="fitPagesToPrint(); closePrintPreview(); window.print();" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1">
+                        <i data-lucide="printer" class="w-3.5 h-3.5"></i> A4 인쇄
+                    </button>
+                    <button onclick="closePrintPreview(); exportToPDF();" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1">
+                        <i data-lucide="file-down" class="w-3.5 h-3.5"></i> PDF 저장
+                    </button>
+                    <button onclick="closePrintPreview()" class="text-slate-400 hover:text-white ml-2">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="print-preview-pages" class="flex flex-col items-center gap-6 p-6 bg-slate-700 rounded-b-xl"></div>
+        </div>
+    </div>
+
     <!-- 자동완성용 datalist (자재명/직종/장비명 이력 기반) -->
     <datalist id="material-name-datalist"></datalist>
     <datalist id="manpower-job-datalist"></datalist>
@@ -1511,17 +1702,21 @@
                     { name: "고강성 PVC관", spec: "D200-6.0m", unit: "본", design: "1000", today: "0", prev: "437" },
                     { name: "바이오숙부비료", spec: "조경용 20kg", unit: "포", design: "5000", today: "0", prev: "2240" }
                 ],
-                manpower: [
+                manpowerLeft: [
                     { job: "직원 (공사관리/안전)", today: "4", prev: "4174" },
                     { job: "반장", today: "0", prev: "583" },
                     { job: "철근공", today: "0", prev: "202" },
-                    { job: "보통인부", today: "0", prev: "1359" },
+                    { job: "보통인부", today: "0", prev: "1359" }
+                ],
+                manpowerRight: [
                     { job: "조경공", today: "0", prev: "1063" },
                     { job: "형틀목공", today: "0", prev: "1853" }
                 ],
-                equipment: [
+                equipmentLeft: [
                     { name: "B/H 0.3 (백호우)", today: "0", prev: "49" },
-                    { name: "B/H 0.6 / 0.8 / 1.0", today: "0", prev: "1272" },
+                    { name: "B/H 0.6 / 0.8 / 1.0", today: "0", prev: "1272" }
+                ],
+                equipmentRight: [
                     { name: "D/T 15T / 25T (덤프)", today: "0", prev: "356" }
                 ],
                 waste: [
@@ -1576,8 +1771,21 @@
 
             obj.materialsLeft = sanitizeList(obj.materialsLeft, defaultMaterial);
             obj.materialsRight = sanitizeList(obj.materialsRight, defaultMaterial);
-            obj.manpower = sanitizeList(obj.manpower, defaultManpower);
-            obj.equipment = sanitizeList(obj.equipment, defaultEquipment);
+
+            // 하위호환: 기존 단일 배열(manpower/equipment)이 있으면 Left로 마이그레이션
+            if (Array.isArray(obj.manpower) && !obj.manpowerLeft) {
+                obj.manpowerLeft = obj.manpower;
+                delete obj.manpower;
+            }
+            if (Array.isArray(obj.equipment) && !obj.equipmentLeft) {
+                obj.equipmentLeft = obj.equipment;
+                delete obj.equipment;
+            }
+
+            obj.manpowerLeft  = sanitizeList(obj.manpowerLeft,  defaultManpower);
+            obj.manpowerRight = sanitizeList(obj.manpowerRight, defaultManpower);
+            obj.equipmentLeft  = sanitizeList(obj.equipmentLeft,  defaultEquipment);
+            obj.equipmentRight = sanitizeList(obj.equipmentRight, defaultEquipment);
 
             // 폐기물 처리 현황: 항상 3개 고정 품목(혼합폐기물/폐콘크리트/폐아스콘) 유지
             const cleanedWaste = sanitizeList(obj.waste, defaultWaste);
@@ -1665,6 +1873,164 @@
                 .then(() => console.info("오프라인 캐시(서비스워커)가 등록되었습니다."))
                 .catch((e) => console.warn("서비스워커 등록 실패:", e));
         }
+
+        // ================= 사이드바: 일자 목록 슬라이드 패널 =================
+        let __sidebarOpen = false;
+
+        function toggleSidebar() {
+            __sidebarOpen = !__sidebarOpen;
+            const sidebar = document.getElementById("date-sidebar");
+            const overlay = document.getElementById("sidebar-overlay");
+            const btn     = document.getElementById("sidebar-toggle-btn");
+            if (!sidebar) return;
+
+            if (__sidebarOpen) {
+                sidebar.style.width = "256px";
+                if (overlay) overlay.classList.remove("hidden");
+                if (btn) btn.style.left = "256px";
+                renderSidebarList();
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } else {
+                sidebar.style.width = "0";
+                if (overlay) overlay.classList.add("hidden");
+                if (btn) btn.style.left = "0";
+            }
+        }
+
+        function renderSidebarList() {
+            const list = document.getElementById("sidebar-date-list");
+            const countEl = document.getElementById("sidebar-total-count");
+            const searchEl = document.getElementById("sidebar-search");
+            if (!list) return;
+
+            const keyword = searchEl ? searchEl.value.trim() : "";
+            let keys = Object.keys(reportDatabase).sort().reverse();
+            if (keyword) keys = keys.filter(d => d.includes(keyword));
+
+            if (countEl) countEl.textContent = `${Object.keys(reportDatabase).length}개 일자 저장됨`;
+
+            if (keys.length === 0) {
+                list.innerHTML = `<p class="text-slate-500 text-xs text-center py-6">${keyword ? "검색 결과 없음" : "저장된 일보 없음"}</p>`;
+                return;
+            }
+
+            const days = ["일","월","화","수","목","금","토"];
+            list.innerHTML = keys.map(d => {
+                const isActive = d === activeDate;
+                const dateObj = new Date(d + "T00:00:00");
+                const dow = isNaN(dateObj.getDay()) ? "" : days[dateObj.getDay()];
+                const rep = reportDatabase[d];
+                const isLocked = rep && rep.metadata && rep.metadata.locked;
+                const manCount = rep ? ([...(rep.manpowerLeft||rep.manpower||[]),...(rep.manpowerRight||[])]).reduce((s,m)=>s+(parseFloat(m.today)||0),0) : 0;
+                return `
+                <button onclick="sidebarGoToDate('${d}')"
+                    class="w-full text-left px-3 py-2 flex items-center gap-2 border-b border-slate-700 hover:bg-slate-700 transition ${isActive ? 'bg-blue-700 border-l-4 border-l-blue-400' : ''}">
+                    <div class="shrink-0 text-center">
+                        <div class="text-[10px] ${isActive ? 'text-blue-200' : 'text-slate-400'}">${d.slice(0,7)}</div>
+                        <div class="text-sm font-black ${isActive ? 'text-white' : 'text-slate-200'}">${d.slice(8)}</div>
+                        <div class="text-[10px] ${isActive ? 'text-blue-200' : 'text-slate-500'}">(${dow})</div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-[10px] ${isActive ? 'text-blue-100' : 'text-slate-300'} truncate">
+                            인원 ${manCount}명
+                            ${isLocked ? '<span class="ml-1 text-amber-400">🔒</span>' : ''}
+                        </div>
+                        <div class="text-[10px] ${isActive ? 'text-blue-200' : 'text-slate-500'} truncate">
+                            ${(rep && rep.metadata && rep.metadata.weather) ? rep.metadata.weather : ""}
+                        </div>
+                    </div>
+                    ${isActive ? '<i data-lucide="chevron-right" class="w-3.5 h-3.5 text-blue-300 shrink-0"></i>' : ''}
+                </button>`;
+            }).join("");
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function sidebarGoToDate(dateStr) {
+            // 날짜 이동 후 사이드바 목록 갱신 (모바일은 닫기)
+            const picker = document.getElementById("report-date-picker");
+            if (picker) picker.value = dateStr;
+            changeReportDate(dateStr);
+            renderSidebarList();
+        }
+
+        // ================= 인쇄 미리보기 =================
+        async function openPrintPreview() {
+            syncStateFromDom();
+            const modal = document.getElementById("print-preview-modal");
+            const container = document.getElementById("print-preview-pages");
+            const info = document.getElementById("preview-page-info");
+            if (!modal || !container) return;
+
+            container.innerHTML = `<div class="text-slate-300 text-sm py-10 flex items-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 미리보기 생성 중...</div>`;
+            modal.classList.remove("hidden");
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            // 잠깐 대기 후 렌더 (DOM 업데이트 반영)
+            await new Promise(r => setTimeout(r, 120));
+
+            try {
+                fitPagesToPrint();
+                await new Promise(r => setTimeout(r, 80));
+
+                const frames = document.querySelectorAll(".print-frame");
+                if (info) info.textContent = `${frames.length}페이지`;
+                container.innerHTML = "";
+
+                for (let i = 0; i < frames.length; i++) {
+                    // 페이지 번호 라벨
+                    const label = document.createElement("div");
+                    label.className = "text-slate-400 text-xs mb-1 self-start";
+                    label.textContent = `페이지 ${i + 1}`;
+                    container.appendChild(label);
+
+                    if (typeof html2canvas !== 'undefined') {
+                        // html2canvas로 실제 렌더 캡처
+                        const canvas = await html2canvas(frames[i], {
+                            scale: 1.5,
+                            useCORS: true,
+                            backgroundColor: "#ffffff",
+                            logging: false,
+                        });
+                        canvas.style.cssText = "max-width:100%; border:2px solid #475569; border-radius:4px; box-shadow:0 4px 24px rgba(0,0,0,0.5);";
+                        container.appendChild(canvas);
+                    } else {
+                        // html2canvas 없을 때 폴백: 안내 문구
+                        const fallback = document.createElement("div");
+                        fallback.className = "bg-white text-slate-700 text-xs p-4 rounded border border-slate-400 w-full max-w-xl text-center";
+                        fallback.textContent = "미리보기 렌더링 라이브러리(html2canvas)를 불러오지 못했습니다. 인터넷 연결 후 다시 시도하거나, 바로 인쇄 버튼을 사용해 주세요.";
+                        container.appendChild(fallback);
+                        break;
+                    }
+                }
+            } catch(e) {
+                container.innerHTML = `<div class="text-rose-400 text-sm py-6">미리보기 생성 중 오류가 발생했습니다.<br><span class="text-slate-400 text-xs">${e.message}</span></div>`;
+            } finally {
+                // transform 원복
+                document.querySelectorAll(".print-page").forEach(p => {
+                    p.style.transform = "";
+                    p.style.height = "";
+                    p.style.justifyContent = "";
+                });
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        }
+
+        function closePrintPreview() {
+            const modal = document.getElementById("print-preview-modal");
+            if (modal) modal.classList.add("hidden");
+            // 컨테이너 비워서 캔버스 메모리 해제
+            const container = document.getElementById("print-preview-pages");
+            if (container) container.innerHTML = "";
+        }
+
+        // ESC로 미리보기 닫기
+        document.addEventListener("keydown", e => {
+            if (e.key === "Escape") {
+                closePrintPreview();
+                if (__sidebarOpen) toggleSidebar();
+            }
+        });
 
         // ================= 헤더 드롭다운 메뉴 =================
         function toggleMenu(id) {
@@ -1795,20 +2161,22 @@
 
             syncStateFromDom();
             pushUndoSnapshot();
-            if (!state.manpower) state.manpower = [];
-            if (!state.equipment) state.equipment = [];
+            if (!state.manpowerLeft) state.manpowerLeft = [];
+            if (!state.manpowerRight) state.manpowerRight = [];
+            if (!state.equipmentLeft) state.equipmentLeft = [];
+            if (!state.equipmentRight) state.equipmentRight = [];
             if (!state.materialsLeft) state.materialsLeft = [];
 
             let addedCount = 0;
             set.manpower.forEach(m => {
-                if (m.job && !state.manpower.some(x => x.job === m.job)) {
-                    state.manpower.push({ job: m.job, today: "0", prev: "0" });
+                if (m.job && !state.manpowerLeft.some(x => x.job === m.job) && !state.manpowerRight.some(x => x.job === m.job)) {
+                    state.manpowerLeft.push({ job: m.job, today: "0", prev: "0" });
                     addedCount++;
                 }
             });
             set.equipment.forEach(eq => {
-                if (eq.name && !state.equipment.some(x => x.name === eq.name)) {
-                    state.equipment.push({ name: eq.name, today: "0", prev: "0" });
+                if (eq.name && !state.equipmentLeft.some(x => x.name === eq.name) && !state.equipmentRight.some(x => x.name === eq.name)) {
+                    state.equipmentLeft.push({ name: eq.name, today: "0", prev: "0" });
                     addedCount++;
                 }
             });
@@ -1885,8 +2253,8 @@
                 Object.values(reportDatabase || {}).forEach(rep => {
                     (rep.materialsLeft || []).forEach(m => m.name && matNames.add(m.name));
                     (rep.materialsRight || []).forEach(m => m.name && matNames.add(m.name));
-                    (rep.manpower || []).forEach(m => m.job && manJobs.add(m.job));
-                    (rep.equipment || []).forEach(e => e.name && eqNames.add(e.name));
+                    [...(rep.manpowerLeft||rep.manpower||[]), ...(rep.manpowerRight||[])].forEach(m => m.job && manJobs.add(m.job));
+                    [...(rep.equipmentLeft||rep.equipment||[]), ...(rep.equipmentRight||[])].forEach(e => e.name && eqNames.add(e.name));
                 });
                 const fill = (id, set) => {
                     const dl = document.getElementById(id);
@@ -1942,8 +2310,9 @@
                 const item = { job: cols[0] || "", today: cols[1] || "0", prev: cols[2] || "0" };
                 if (!item.job.trim()) return;
                 const targetIdx = startIndex + idx;
-                if (state.manpower[targetIdx]) state.manpower[targetIdx] = item;
-                else state.manpower.push(item);
+                if (!state.manpowerLeft) state.manpowerLeft = [];
+                if (state.manpowerLeft[targetIdx]) state.manpowerLeft[targetIdx] = item;
+                else state.manpowerLeft.push(item);
             });
             syncDomFromState();
             autoSaveToCache();
@@ -1961,8 +2330,9 @@
                 const item = { name: cols[0] || "", today: cols[1] || "0", prev: cols[2] || "0" };
                 if (!item.name.trim()) return;
                 const targetIdx = startIndex + idx;
-                if (state.equipment[targetIdx]) state.equipment[targetIdx] = item;
-                else state.equipment.push(item);
+                if (!state.equipmentLeft) state.equipmentLeft = [];
+                if (state.equipmentLeft[targetIdx]) state.equipmentLeft[targetIdx] = item;
+                else state.equipmentLeft.push(item);
             });
             syncDomFromState();
             autoSaveToCache();
@@ -2081,11 +2451,16 @@
             document.body.classList.add("stats-print-mode");
             window.print();
         }
-        window.addEventListener("afterprint", () => {
-            document.body.classList.remove("stats-print-mode");
-        });
-
         // ================= PDF 파일로 직접 저장 (html2canvas + jsPDF) =================
+        // ================= 문서 자동화 1: PDF 자동 파일명 =================
+        // 현장명_YYYY-MM-DD_작업일보.pdf 형식으로 자동 생성
+        function getAutoFileName(ext) {
+            const siteList = getSiteList();
+            const site = siteList.find(s => s.id === currentSiteId);
+            const siteName = (site && site.name) ? site.name.replace(/[/\\\\:*?"<>|]/g, '_') : "현장";
+            return `${siteName}_${activeDate}_작업일보.${ext}`;
+        }
+
         async function exportToPDF() {
             if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
                 showToast("PDF 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해주세요.");
@@ -2108,16 +2483,235 @@
                     pdf.addImage(imgData, "JPEG", 0, 0, 210, 297);
                 }
 
-                pdf.save(`작업일보_${activeDate}.pdf`);
-                showToast("PDF 파일이 저장되었습니다.");
+                const fileName = getAutoFileName("pdf");
+                pdf.save(fileName);
+                showToast(`PDF 저장 완료: ${fileName}`);
             } catch(e) {
                 console.error(e);
                 showToast("PDF 생성 중 오류가 발생했습니다.");
             } finally {
-                document.querySelectorAll(".print-page").forEach(page => { page.style.transform = ""; });
+                document.querySelectorAll(".print-page").forEach(page => {
+                    page.style.transform = "";
+                    page.style.height = "";
+                    page.style.justifyContent = "";
+                });
                 if (btn) btn.disabled = false;
             }
         }
+
+        // ================= 문서 자동화 2: JSON 백업 자동 파일명 =================
+        function exportToJSON() {
+            try {
+                syncStateFromDom();
+                reportDatabase[activeDate] = state;
+                localStorage.setItem(dbKey(), JSON.stringify(reportDatabase));
+                const blob = new Blob([JSON.stringify(reportDatabase, null, 2)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = getAutoFileName("json").replace("_작업일보.json", "_백업.json");
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast("백업 파일이 저장되었습니다.");
+            } catch(e) {
+                showToast("백업 저장 중 오류가 발생했습니다.");
+            }
+        }
+
+        // ================= 문서 자동화 3: 주간 보고서 =================
+        let __weekOffset = 0; // 0 = 이번 주, -1 = 지난 주, ...
+
+        function getWeekRange(offset) {
+            const now = new Date();
+            const dow = now.getDay(); // 0=일, 1=월...6=토
+            // 이번 주 월요일
+            const monday = new Date(now);
+            monday.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1) + offset * 7);
+            monday.setHours(0,0,0,0);
+            const friday = new Date(monday);
+            friday.setDate(monday.getDate() + 4);
+            const saturday = new Date(monday);
+            saturday.setDate(monday.getDate() + 5);
+            return {
+                start: monday.toISOString().slice(0,10),
+                end:   saturday.toISOString().slice(0,10),   // 토 포함
+                weekdays: Array.from({length:6}, (_,i) => {
+                    const d = new Date(monday);
+                    d.setDate(monday.getDate() + i);
+                    return d.toISOString().slice(0,10);
+                })
+            };
+        }
+
+        function updateWeekLabel() {
+            const { start, end } = getWeekRange(__weekOffset);
+            const el = document.getElementById("weekly-range-label");
+            if (el) el.textContent = `${start} ~ ${end}`;
+        }
+
+        function shiftWeek(delta) {
+            __weekOffset += delta;
+            updateWeekLabel();
+        }
+
+        function setWeekToThis() {
+            __weekOffset = 0;
+            updateWeekLabel();
+        }
+
+        function openWeeklyReportModal() {
+            updateWeekLabel();
+            document.getElementById("weekly-report-body").innerHTML =
+                `<p class="text-slate-400 text-center py-10">주를 선택하고 "생성" 버튼을 눌러주세요.</p>`;
+            document.getElementById("weekly-report-modal").classList.remove("hidden");
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function generateWeeklyReport() {
+            syncStateFromDom();
+            reportDatabase[activeDate] = state;
+
+            const { start, end, weekdays } = getWeekRange(__weekOffset);
+            const siteList = getSiteList();
+            const siteName = (siteList.find(s => s.id === currentSiteId) || {}).name || "현장";
+            const dayLabels = ["월","화","수","목","금","토"];
+
+            // 일자별 데이터 수집
+            const days = weekdays.map((d, idx) => {
+                const rep = reportDatabase[d];
+                if (!rep) return { d, idx, empty: true };
+                const sumField = (list, f) => (list||[]).reduce((s,it)=>(s+(parseFloat(it[f])||0)),0);
+                return {
+                    d, idx, empty: false,
+                    manTotal:  sumField([...( rep.manpowerLeft||[]), ...(rep.manpowerRight||[])], "today"),
+                    eqTotal:   sumField([...(rep.equipmentLeft||[]), ...(rep.equipmentRight||[])], "today"),
+                    todayWork: rep.metadata?.todayWorks   || "",
+                    tomorrowWork: rep.metadata?.tomorrowWorks || "",
+                    weather:   rep.metadata?.weather || "",
+                    rateActual: rep.metadata?.rateActual || "",
+                    manpower:  [...(rep.manpowerLeft||[]), ...(rep.manpowerRight||[])].filter(m=>m.job),
+                    equipment: [...(rep.equipmentLeft||[]), ...(rep.equipmentRight||[])].filter(e=>e.name),
+                    materials: [...(rep.materialsLeft||[]), ...(rep.materialsRight||[])].filter(m=>m.name),
+                };
+            });
+
+            const { sums: weekSums } = computePeriodSums(start, end);
+            const weekManTotal = days.reduce((s,d)=>s+(d.manTotal||0),0);
+            const weekEqTotal  = days.reduce((s,d)=>s+(d.eqTotal||0),0);
+            const writtenDays  = days.filter(d=>!d.empty).length;
+
+            // 렌더
+            const body = document.getElementById("weekly-report-body");
+            body.innerHTML = buildWeeklyReportHTML(siteName, start, end, days, dayLabels, weekSums, weekManTotal, weekEqTotal, writtenDays);
+            showToast("주간 보고서가 생성되었습니다.");
+        }
+
+        function buildWeeklyReportHTML(siteName, start, end, days, dayLabels, weekSums, weekManTotal, weekEqTotal, writtenDays) {
+            const th = (t) => `<th class="border border-slate-400 bg-slate-100 px-2 py-1 text-center font-bold whitespace-nowrap">${t}</th>`;
+            const td = (t, cls="") => `<td class="border border-slate-300 px-2 py-1 ${cls}">${t||"-"}</td>`;
+            const tdR = (t) => td(t, "text-right font-semibold");
+
+            // 1) 요약 테이블
+            let html = `
+            <div class="mb-4 font-bold text-slate-800 text-sm">${siteName} — 주간 작업 현황 (${start} ~ ${end})</div>
+
+            <table class="w-full border-collapse mb-4 text-[11px]">
+                <thead><tr>
+                    ${th("구분")}${days.map((_,i)=>th(dayLabels[i])).join("")}${th("주간 합계")}
+                </tr></thead>
+                <tbody>
+                    <tr>
+                        ${th("날씨")}
+                        ${days.map(d=>td(d.weather)).join("")}
+                        ${td("-")}
+                    </tr>
+                    <tr>
+                        ${th("투입 인원")}
+                        ${days.map(d=>tdR(d.empty ? "-" : d.manTotal+"명")).join("")}
+                        ${tdR(weekManTotal+"명")}
+                    </tr>
+                    <tr>
+                        ${th("투입 장비")}
+                        ${days.map(d=>tdR(d.empty ? "-" : d.eqTotal+"대")).join("")}
+                        ${tdR(weekEqTotal+"대")}
+                    </tr>
+                    <tr>
+                        ${th("실적 진척률")}
+                        ${days.map(d=>td(d.rateActual||"-","text-center")).join("")}
+                        ${td("-","text-center")}
+                    </tr>
+                    <tr>
+                        ${th("작업 내용")}
+                        ${days.map(d=>td(`<div class="whitespace-pre-wrap max-w-[100px]">${d.todayWork||"-"}</div>`)).join("")}
+                        ${td("-")}
+                    </tr>
+                </tbody>
+            </table>`;
+
+            // 2) 주간 인원/자재/장비 합계
+            const cats = ["인원","자재","장비"];
+            html += `<div class="grid grid-cols-3 gap-2 mb-4">`;
+            cats.forEach(cat => {
+                const entries = Object.entries(weekSums[cat]||{}).filter(([,v])=>v>0);
+                html += `<div>
+                    <div class="bg-slate-800 text-white font-bold text-[10px] py-0.5 px-2 mb-1">■ 주간 ${cat} 합계</div>
+                    <table class="w-full border-collapse text-[10px]">
+                        ${entries.length===0
+                            ? `<tr><td class="border px-2 py-1 text-slate-400 text-center">데이터 없음</td></tr>`
+                            : entries.map(([name,val])=>`<tr><td class="border border-slate-300 px-2 py-0.5">${name}</td><td class="border border-slate-300 px-2 py-0.5 text-right font-bold">${val.toLocaleString('ko-KR',{maximumFractionDigits:3})}</td></tr>`).join("")
+                        }
+                    </table>
+                </div>`;
+            });
+            html += `</div>`;
+
+            // 3) 일자별 작업 상세
+            html += `<div class="bg-slate-800 text-white font-bold text-[10px] py-0.5 px-2 mb-2">■ 일자별 작업 상세</div>`;
+            days.forEach((d,i) => {
+                if (d.empty) {
+                    html += `<div class="mb-2 border rounded p-2 bg-slate-50">
+                        <span class="font-bold text-slate-500 text-[10px]">${d.d} (${dayLabels[i]}) — 작성된 일보 없음</span>
+                    </div>`;
+                    return;
+                }
+                html += `<div class="mb-2 border rounded overflow-hidden">
+                    <div class="bg-slate-700 text-white text-[10px] font-bold px-2 py-0.5">${d.d} (${dayLabels[i]}) · 날씨: ${d.weather||"-"} · 인원 ${d.manTotal}명 · 장비 ${d.eqTotal}대</div>
+                    <div class="p-2 text-[10px] grid grid-cols-2 gap-2">
+                        <div><span class="font-bold text-slate-500">금일 작업:</span><div class="whitespace-pre-wrap">${d.todayWork||"-"}</div></div>
+                        <div><span class="font-bold text-slate-500">익일 예정:</span><div class="whitespace-pre-wrap">${d.tomorrowWork||"-"}</div></div>
+                    </div>
+                </div>`;
+            });
+
+            return html;
+        }
+
+        function printWeeklyReport() {
+            const src = document.getElementById("weekly-report-body");
+            const dst = document.getElementById("weekly-print-body");
+            if (!src || !dst || src.innerHTML.includes("주를 선택하고")) {
+                showToast("먼저 보고서를 생성해주세요.");
+                return;
+            }
+            const { start, end } = getWeekRange(__weekOffset);
+            const siteList = getSiteList();
+            const siteName = (siteList.find(s=>s.id===currentSiteId)||{}).name||"현장";
+            dst.innerHTML = `
+                <h1 style="font-size:16px;font-weight:900;margin-bottom:4px;">${siteName} 주간 작업 보고서</h1>
+                <p style="font-size:11px;color:#64748b;margin-bottom:16px;">대상 기간: ${start} ~ ${end}</p>
+                ${src.innerHTML}
+            `;
+            document.body.classList.add("weekly-print-mode");
+            window.print();
+        }
+
+        window.addEventListener("afterprint", () => {
+            document.body.classList.remove("weekly-print-mode");
+            document.body.classList.remove("summary-print-mode");
+            document.body.classList.remove("stats-print-mode");
+        });
 
         // ================= 전일 복제 =================
         function cloneFromPreviousDay() {
@@ -2207,8 +2801,8 @@
             syncStateFromDom();
             let list;
             if (listKey === "materials") list = (side === "left") ? state.materialsLeft : state.materialsRight;
-            else if (listKey === "manpower") list = state.manpower;
-            else if (listKey === "equipment") list = state.equipment;
+            else if (listKey === "manpower") list = (side === "right") ? state.manpowerRight : state.manpowerLeft;
+            else if (listKey === "equipment") list = (side === "right") ? state.equipmentRight : state.equipmentLeft;
             if (!list || fromIndex >= list.length || fromIndex < 0 || targetIndex >= list.length || targetIndex < 0) return;
 
             const [moved] = list.splice(fromIndex, 1);
@@ -2235,8 +2829,8 @@
 
             checkList(state.materialsLeft, "name", "자재(좌)");
             checkList(state.materialsRight, "name", "자재(우)");
-            checkList(state.manpower, "job", "인원");
-            checkList(state.equipment, "name", "장비");
+            checkList([...(state.manpowerLeft||[]), ...(state.manpowerRight||[])], "job", "인원");
+            checkList([...(state.equipmentLeft||[]), ...(state.equipmentRight||[])], "name", "장비");
 
             const body = document.getElementById("presubmit-check-body");
             if (issues.length === 0) {
@@ -2310,8 +2904,8 @@
                 const todayReport = db[todayStr];
                 let manCount = 0, eqCount = 0, actualRate = "-";
                 if (todayReport) {
-                    manCount = sumField(todayReport.manpower, "today");
-                    eqCount = sumField(todayReport.equipment, "today");
+                    manCount = sumField([...(todayReport.manpowerLeft||todayReport.manpower||[]), ...(todayReport.manpowerRight||[])], "today");
+                    eqCount = sumField([...(todayReport.equipmentLeft||todayReport.equipment||[]), ...(todayReport.equipmentRight||[])], "today");
                     actualRate = (todayReport.metadata && todayReport.metadata.rateActual) || "-";
                 }
                 return { name: site.name, hasToday: !!todayReport, manCount, eqCount, actualRate };
@@ -2420,8 +3014,8 @@
             syncStateFromDom();
             const m = state.metadata || {};
             const sumField = (list, field) => (list || []).reduce((sum, it) => sum + (parseFloat(it[field]) || 0), 0);
-            const totalMan = sumField(state.manpower, "today");
-            const totalEq = sumField(state.equipment, "today");
+            const totalMan = sumField([...(state.manpowerLeft||[]), ...(state.manpowerRight||[])], "today");
+            const totalEq = sumField([...(state.equipmentLeft||[]), ...(state.equipmentRight||[])], "today");
 
             const body = document.getElementById("summary-print-body");
             body.innerHTML = `
@@ -2453,14 +3047,11 @@
                     <h3 style="font-size:13px; font-weight:bold; margin-bottom:4px; color:#1e293b;">안전/환경 관리</h3>
                     <p style="font-size:12px; white-space:pre-wrap; color:#334155;">${(m.safetyMgmt || "-")}\n${(m.envMgmt || "-")}</p>
                 </div>
+                ${m.specialNote ? `<div><h3 style="font-size:13px; font-weight:bold; margin-bottom:4px; color:#1e293b;">특이사항</h3><p style="font-size:12px; color:#334155;">${m.specialNote}</p></div>` : ''}
             `;
             document.body.classList.add("summary-print-mode");
             window.print();
         }
-        window.addEventListener("afterprint", () => {
-            document.body.classList.remove("summary-print-mode");
-        });
-
         // ================= 실행취소(Undo) =================
         let __undoStack = [];
         const UNDO_STACK_LIMIT = 15;
@@ -2596,8 +3187,9 @@
                             const job = String(r[jobCol] || "").trim();
                             if (!job) return;
                             const todayVal = manCountCol > -1 ? String(r[manCountCol] || "0") : "0";
-                            if (!state.manpower.some(x => x.job === job)) {
-                                state.manpower.push({ job, today: todayVal, prev: "0" });
+                            if (!state.manpowerLeft.some(x => x.job === job) && !state.manpowerRight.some(x => x.job === job)) {
+                                if (!state.manpowerLeft) state.manpowerLeft = [];
+                                state.manpowerLeft.push({ job, today: todayVal, prev: "0" });
                                 addedMan++;
                             }
                         });
@@ -2607,8 +3199,9 @@
                             const name = String(r[eqNameCol] || "").trim();
                             if (!name) return;
                             const todayVal = eqCountCol > -1 ? String(r[eqCountCol] || "0") : "0";
-                            if (!state.equipment.some(x => x.name === name)) {
-                                state.equipment.push({ name, today: todayVal, prev: "0" });
+                            if (!(state.equipmentLeft||[]).some(x => x.name === name) && !(state.equipmentRight||[]).some(x => x.name === name)) {
+                                if (!state.equipmentLeft) state.equipmentLeft = [];
+                                state.equipmentLeft.push({ name, today: todayVal, prev: "0" });
                                 addedEq++;
                             }
                         });
@@ -2985,8 +3578,10 @@
 
             mergeList(state.materialsLeft, source.materialsLeft || [], ["name", "spec"]);
             mergeList(state.materialsRight, source.materialsRight || [], ["name", "spec"]);
-            mergeList(state.manpower, source.manpower || [], ["job"]);
-            mergeList(state.equipment, source.equipment || [], ["name"]);
+            mergeList(state.manpowerLeft, source.manpowerLeft || source.manpower || [], ["job"]);
+            mergeList(state.manpowerRight, source.manpowerRight || [], ["job"]);
+            mergeList(state.equipmentLeft, source.equipmentLeft || source.equipment || [], ["name"]);
+            mergeList(state.equipmentRight, source.equipmentRight || [], ["name"]);
 
             ensureStateStructure(state, activeDate);
             syncDomFromState();
@@ -3025,8 +3620,8 @@
                 const rep = reportDatabase[d];
                 (rep.materialsLeft || []).forEach(m => addSum("자재", m.name, m.unit, parseFloat(m.today) || 0));
                 (rep.materialsRight || []).forEach(m => addSum("자재", m.name, m.unit, parseFloat(m.today) || 0));
-                (rep.manpower || []).forEach(m => addSum("인원", m.job, "명", parseFloat(m.today) || 0));
-                (rep.equipment || []).forEach(e => addSum("장비", e.name, "대", parseFloat(e.today) || 0));
+                [...(rep.manpowerLeft||rep.manpower||[]), ...(rep.manpowerRight||[])].forEach(m => addSum("인원", m.job, "명", parseFloat(m.today) || 0));
+                [...(rep.equipmentLeft||rep.equipment||[]), ...(rep.equipmentRight||[])].forEach(e => addSum("장비", e.name, "대", parseFloat(e.today) || 0));
                 (rep.waste || []).forEach(w => addSum("폐기물", w.name, "", parseFloat(w.today) || 0));
             });
             return { targetDates, sums };
@@ -3097,10 +3692,10 @@
             const dailyRows = [["일자", "직종/장비/자재", "구분", "금일 투입량", "단위"]];
             targetDates.forEach(d => {
                 const rep = reportDatabase[d];
-                (rep.manpower || []).forEach(m => {
+                [...(rep.manpowerLeft||rep.manpower||[]), ...(rep.manpowerRight||[])].forEach(m => {
                     if (m.job) dailyRows.push([d, m.job, "인원", parseFloat(m.today) || 0, "명"]);
                 });
-                (rep.equipment || []).forEach(e => {
+                [...(rep.equipmentLeft||rep.equipment||[]), ...(rep.equipmentRight||[])].forEach(e => {
                     if (e.name) dailyRows.push([d, e.name, "장비", parseFloat(e.today) || 0, "대"]);
                 });
                 [...(rep.materialsLeft || []), ...(rep.materialsRight || [])].forEach(m => {
@@ -3155,15 +3750,21 @@
         }
 
         // 일보 날짜 변경시 이전 자료 자동 연동 기능 적용
-        function changeReportDate() {
+        function changeReportDate(dateStr) {
             const picker = document.getElementById("report-date-picker");
-            if (!picker || !picker.value) return;
+            // dateStr 파라미터가 있으면 우선 사용 (사이드바 직접 호출용)
+            if (dateStr) {
+                if (picker) picker.value = dateStr;
+            } else {
+                if (!picker || !picker.value) return;
+                dateStr = picker.value;
+            }
 
             syncStateFromDom();
             reportDatabase[activeDate] = JSON.parse(JSON.stringify(state));
 
-            const prevDate = activeDate; // 직전 기준일 기록
-            activeDate = picker.value;
+            const prevDate = activeDate;
+            activeDate = dateStr;
             localStorage.setItem(activeDateKey(), activeDate);
 
             // 해당 날짜에 데이터가 없을 시, 이전 자료 구조 및 데이터 그대로 복제 연동 (자동 롤오버)
@@ -3299,6 +3900,7 @@
                 clearDirty();
                 updateStorageGauge();
                 buildAutocompleteLists();
+                if (__sidebarOpen) renderSidebarList();
             } catch(e) {
                 console.error("데이터베이스 저장 한도 초과", e);
                 showToast("사진 용량이 너무 커 브라우저 한도 초과가 발생했습니다. 사진 해상도를 조절하여 저장하세요.");
@@ -3524,6 +4126,8 @@
             if (tmWorks) state.metadata.tomorrowWorks = tmWorks.value;
             if (safety) state.metadata.safetyMgmt = safety.value;
             if (env) state.metadata.envMgmt = env.value;
+            const specialNote = document.getElementById("special-note");
+            if (specialNote) state.metadata.specialNote = specialNote.value;
 
             // 자재 수집 (좌측) - 빈 행 필터링 포함
             state.materialsLeft = [];
@@ -3580,46 +4184,36 @@
                 }
             });
 
-            // 인원 수집 - 빈 행 필터링 포함
-            state.manpower = [];
+            // 인원 수집 — manpower-body tbody에서 id 패턴으로 side 구분
+            state.manpowerLeft = [];
+            state.manpowerRight = [];
             document.querySelectorAll("#manpower-body tr").forEach((row) => {
-
-                const jobEl = row.querySelector("td:nth-child(1) input");
-                const todayEl = row.querySelector("td:nth-child(2) input");
-                const accumEl = row.querySelector("td:nth-child(3) input");
-                
-                if (jobEl && jobEl.value.trim() !== "") {
-                    const todayVal = parseFloat(todayEl ? todayEl.value.replace(/,/g, '') : "0") || 0;
-                    const accumVal = parseFloat(accumEl ? accumEl.value.replace(/,/g, '') : "0") || 0;
-                    const calculatedPrev = Math.max(0, accumVal - todayVal);
-
-                    state.manpower.push({
-                        job: jobEl.value,
-                        today: todayEl ? todayEl.value : "0",
-                        prev: String(calculatedPrev)
-                    });
-                }
+                ['left','right'].forEach(side => {
+                    const jobEl  = row.querySelector(`input[id^="man-${side}-job-"]`);
+                    const todEl  = row.querySelector(`input[id^="man-${side}-today-"]`);
+                    const accEl  = row.querySelector(`input[id^="man-${side}-accum-"]`);
+                    if (!jobEl || !jobEl.value.trim()) return;
+                    const tV = parseFloat((todEl?.value||"0").replace(/,/g,''))||0;
+                    const aV = parseFloat((accEl?.value||"0").replace(/,/g,''))||0;
+                    const list = side === 'right' ? state.manpowerRight : state.manpowerLeft;
+                    list.push({ job: jobEl.value, today: todEl?.value||"0", prev: String(Math.max(0,aV-tV)) });
+                });
             });
 
-            // 장비 수집 - 빈 행 필터링 포함
-            state.equipment = [];
+            // 장비 수집
+            state.equipmentLeft = [];
+            state.equipmentRight = [];
             document.querySelectorAll("#equipment-body tr").forEach((row) => {
-
-                const nameEl = row.querySelector("td:nth-child(1) input");
-                const todayEl = row.querySelector("td:nth-child(2) input");
-                const accumEl = row.querySelector("td:nth-child(3) input");
-                
-                if (nameEl && nameEl.value.trim() !== "") {
-                    const todayVal = parseFloat(todayEl ? todayEl.value.replace(/,/g, '') : "0") || 0;
-                    const accumVal = parseFloat(accumEl ? accumEl.value.replace(/,/g, '') : "0") || 0;
-                    const calculatedPrev = Math.max(0, accumVal - todayVal);
-
-                    state.equipment.push({
-                        name: nameEl.value,
-                        today: todayEl ? todayEl.value : "0",
-                        prev: String(calculatedPrev)
-                    });
-                }
+                ['left','right'].forEach(side => {
+                    const nameEl = row.querySelector(`input[id^="eq-${side}-name-"]`);
+                    const todEl  = row.querySelector(`input[id^="eq-${side}-today-"]`);
+                    const accEl  = row.querySelector(`input[id^="eq-${side}-accum-"]`);
+                    if (!nameEl || !nameEl.value.trim()) return;
+                    const tV = parseFloat((todEl?.value||"0").replace(/,/g,''))||0;
+                    const aV = parseFloat((accEl?.value||"0").replace(/,/g,''))||0;
+                    const list = side === 'right' ? state.equipmentRight : state.equipmentLeft;
+                    list.push({ name: nameEl.value, today: todEl?.value||"0", prev: String(Math.max(0,aV-tV)) });
+                });
             });
 
             // 폐기물 처리 현황 수집 (고정 3항목)
@@ -3700,18 +4294,20 @@
             if(tmWorks) tmWorks.value = state.metadata.tomorrowWorks || "";
             if(safety) safety.value = state.metadata.safetyMgmt || "";
             if(env) env.value = state.metadata.envMgmt || "";
+            const specialNoteEl = document.getElementById("special-note");
+            if(specialNoteEl) specialNoteEl.value = state.metadata.specialNote || "";
             refreshAllAutoGrowTextareas();
             applyLockUI();
 
             // 좌우 매칭 그리드 크기 자동 보정 계산
-            const maxMaterialsLen = Math.max(state.materialsLeft.length, state.materialsRight.length, 11); // 표준 11줄 이상으로 통일
-            const maxManEqLen = Math.max(state.manpower.length, state.equipment.length, 5); // 표준 5줄 이상으로 통일
+            const maxMaterialsLen = Math.max(state.materialsLeft.length, state.materialsRight.length, 11);
+            const maxManLen = Math.max((state.manpowerLeft||[]).length, (state.manpowerRight||[]).length, 5);
+            const maxEqLen  = Math.max((state.equipmentLeft||[]).length, (state.equipmentRight||[]).length, 5);
 
-            // 테이블 렌더링 (대칭 크기 전송)
             renderMaterialTable("materials-left-body", state.materialsLeft || [], "left", maxMaterialsLen);
             renderMaterialTable("materials-right-body", state.materialsRight || [], "right", maxMaterialsLen);
-            renderManpowerTable(state.manpower || [], maxManEqLen);
-            renderEquipmentTable(state.equipment || [], maxManEqLen);
+            renderManpowerTable(state.manpowerLeft || [], state.manpowerRight || [], maxManLen);
+            renderEquipmentTable(state.equipmentLeft || [], state.equipmentRight || [], maxEqLen);
             renderWasteTable(state.waste || []);
 
             // 사진 데이터 복원
@@ -3745,6 +4341,7 @@
             }
 
             updateLiveDashboard();
+            if (__sidebarOpen) renderSidebarList();
         }
 
         // ================= 동적 테이블 빌더 (수평 라인 정렬 적용) =================
@@ -3799,90 +4396,115 @@
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
-        function renderManpowerTable(list, targetLen) {
+        function renderManpowerTable(listLeft, listRight, targetLen) {
             const tbody = document.getElementById("manpower-body");
             if(!tbody) return;
             tbody.innerHTML = "";
 
-            // 1. 실 데이터 렌더링
-            list.forEach((item, i) => {
-                const tVal = parseFloat(String(item.today).replace(/,/g, '')) || 0;
-                const pVal = parseFloat(String(item.prev).replace(/,/g, '')) || 0;
-                const accumTotal = (tVal + pVal).toLocaleString('ko-KR');
+            // 인원 패널이 좌/우 나란히 독립 섹션이므로, 두 리스트를 합쳐 단일 열로 렌더링
+            // 좌측 패널 → manpowerLeft, 우측 패널 → manpowerRight 를 각각 한 tbody에 모두 표시
+            const combined = [];
+            for (let i = 0; i < targetLen; i++) {
+                combined.push({ item: listLeft[i] || null, side: 'left', idx: i });
+                combined.push({ item: listRight[i] || null, side: 'right', idx: i });
+            }
 
+            // 실제로는 좌패널/우패널이 분리된 DOM이므로, 각 tbody에 해당 리스트만 그림
+            const renderSingle = (list, side) => {
+                const id = "manpower-body";
+                const tgt = document.getElementById(id);
+                if (!tgt) return;
+                list.forEach((item, i) => {
+                    const isReal = item && item.job;
+                    const accum = isReal ? ((parseFloat(String(item.today).replace(/,/g,''))||0)+(parseFloat(String(item.prev).replace(/,/g,''))||0)).toLocaleString('ko-KR') : "";
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td class="title-cell text-left"><input type="text" id="man-${side}-job-${i}" value="${isReal ? item.job : ''}" placeholder="${isReal ? '' : '입력시 자동추가'}" list="manpower-job-datalist" onpaste="handleBulkPasteManpower(event,'${side}',${i})" class="text-left${isReal ? '' : ' text-slate-400 focus:text-slate-800'}"></td>
+                        <td><input type="text" id="man-${side}-today-${i}" value="${isReal ? item.today : ''}" oninput="autoSumManpower('${side}',${i})" class="text-center bg-blue-50/50 font-bold"></td>
+                        <td><input type="text" id="man-${side}-accum-${i}" value="${accum}" oninput="autoCalcPrevManpower('${side}',${i})" class="text-center font-bold bg-slate-50 text-[11px]"></td>
+                        <td class="no-print text-center w-[36px] p-0">
+                            ${isReal ? `
+                            <span draggable="true" ondragstart="handleRowDragStart(event,'manpower','${side}',${i})" ondragend="handleRowDragEnd(event)" class="cursor-grab text-slate-400 hover:text-slate-600 inline-block align-middle"><i data-lucide="grip-vertical" class="w-3 h-3 inline"></i></span>
+                            <button onclick="removeManpowerRow('${side}',${i})" class="text-red-500 hover:text-red-700"><i data-lucide="minus-square" class="w-3.5 h-3.5"></i></button>
+                            ` : ''}
+                        </td>
+                    `;
+                    tgt.appendChild(tr);
+                    tr.addEventListener("dragover", handleRowDragOver);
+                    tr.addEventListener("drop", (e) => handleRowDrop(e, 'manpower', side, i));
+                });
+            };
+
+            // 인원은 두 섹션이 나란히 별도 tbody를 공유하므로 left → tbody에 먼저, right는 equipment-body 아래 별도로
+            // 실제 DOM은 manpower-body 하나, equipment-body 하나 → left+right 합쳐서 순서대로
+            const allItems = [
+                ...listLeft.map((it,i) => ({it, side:'left', i})),
+                ...listRight.map((it,i) => ({it, side:'right', i})),
+            ];
+            // 정렬: left i=0, right i=0, left i=1, right i=1 ... 인터리브
+            const interleaved = [];
+            for (let i = 0; i < targetLen; i++) {
+                if (i < listLeft.length || listLeft[i]) interleaved.push({it: listLeft[i]||null, side:'left', i});
+                else interleaved.push({it:null, side:'left', i});
+                if (i < listRight.length || listRight[i]) interleaved.push({it: listRight[i]||null, side:'right', i});
+                else interleaved.push({it:null, side:'right', i});
+            }
+
+            interleaved.forEach(({it, side, i}) => {
+                const isReal = it && it.job;
+                const accum = isReal ? ((parseFloat(String(it.today).replace(/,/g,''))||0)+(parseFloat(String(it.prev).replace(/,/g,''))||0)).toLocaleString('ko-KR') : "";
                 const tr = document.createElement("tr");
+                const sideLabel = side === 'left' ? '좌' : '우';
                 tr.innerHTML = `
-                    <td class="title-cell text-left"><input type="text" id="man-job-${i}" value="${item.job}" list="manpower-job-datalist" onpaste="handleBulkPasteManpower(event, ${i})"></td>
-                    <td><input type="text" id="man-today-${i}" value="${item.today}" oninput="autoSumManpower(${i})" class="text-center bg-blue-50/50 font-bold"></td>
-                    <td><input type="text" id="man-accum-${i}" value="${accumTotal}" oninput="autoCalcPrevManpower(${i})" class="text-center font-bold bg-slate-50"></td>
-                    <td class="no-print text-center w-[44px]">
-                        <span draggable="true" ondragstart="handleRowDragStart(event,'manpower',null,${i})" ondragend="handleRowDragEnd(event)" class="cursor-grab text-slate-400 hover:text-slate-600 inline-block align-middle" title="드래그하여 순서 변경"><i data-lucide="grip-vertical" class="w-3.5 h-3.5 inline"></i></span>
-                        <button onclick="removeManpowerRow(${i})" class="text-red-500 hover:text-red-700">
-                            <i data-lucide="minus-square" class="w-4 h-4 mx-auto"></i>
-                        </button>
+                    <td class="title-cell text-left"><input type="text" id="man-${side}-job-${i}" value="${isReal ? it.job : ''}" placeholder="${isReal ? '' : `입력시 자동추가(${sideLabel})`}" list="manpower-job-datalist" onpaste="handleBulkPasteManpower(event,'${side}',${i})" class="text-left${isReal ? '' : ' text-slate-400 focus:text-slate-800'}"></td>
+                    <td><input type="text" id="man-${side}-today-${i}" value="${isReal ? it.today : ''}" oninput="autoSumManpower('${side}',${i})" class="text-center bg-blue-50/50 font-bold"></td>
+                    <td><input type="text" id="man-${side}-accum-${i}" value="${accum}" oninput="autoCalcPrevManpower('${side}',${i})" class="text-center font-bold bg-slate-50 text-[11px]"></td>
+                    <td class="no-print text-center w-[36px] p-0">
+                        ${isReal ? `
+                        <span draggable="true" ondragstart="handleRowDragStart(event,'manpower','${side}',${i})" ondragend="handleRowDragEnd(event)" class="cursor-grab text-slate-400 hover:text-slate-600 inline-block align-middle"><i data-lucide="grip-vertical" class="w-3 h-3 inline"></i></span>
+                        <button onclick="removeManpowerRow('${side}',${i})" class="text-red-500 hover:text-red-700"><i data-lucide="minus-square" class="w-3.5 h-3.5"></i></button>
+                        ` : ''}
                     </td>
                 `;
                 tbody.appendChild(tr);
                 tr.addEventListener("dragover", handleRowDragOver);
-                tr.addEventListener("drop", (e) => handleRowDrop(e, 'manpower', null, i));
+                tr.addEventListener("drop", (e) => handleRowDrop(e, 'manpower', side, i));
             });
-
-            // 2. 패딩 렌더링
-            for (let i = list.length; i < targetLen; i++) {
-                const tr = document.createElement("tr");
-                tr.className = "padded-empty-row";
-                tr.innerHTML = `
-                    <td class="title-cell text-left"><input type="text" id="man-job-${i}" value="" placeholder="입력시 자동추가" list="manpower-job-datalist" onpaste="handleBulkPasteManpower(event, ${i})" class="text-slate-400 focus:text-slate-800"></td>
-                    <td><input type="text" id="man-today-${i}" value="" oninput="autoSumManpower(${i})" class="text-center"></td>
-                    <td><input type="text" id="man-accum-${i}" value="" oninput="autoCalcPrevManpower(${i})" class="text-center font-bold bg-slate-50"></td>
-                    <td class="no-print text-center w-[30px]"></td>
-                `;
-                tbody.appendChild(tr);
-            }
 
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
-        function renderEquipmentTable(list, targetLen) {
+        function renderEquipmentTable(listLeft, listRight, targetLen) {
             const tbody = document.getElementById("equipment-body");
             if(!tbody) return;
             tbody.innerHTML = "";
 
-            // 1. 실 데이터 렌더링
-            list.forEach((item, i) => {
-                const tVal = parseFloat(String(item.today).replace(/,/g, '')) || 0;
-                const pVal = parseFloat(String(item.prev).replace(/,/g, '')) || 0;
-                const accumTotal = (tVal + pVal).toLocaleString('ko-KR');
+            const interleaved = [];
+            for (let i = 0; i < targetLen; i++) {
+                interleaved.push({it: listLeft[i]||null, side:'left', i});
+                interleaved.push({it: listRight[i]||null, side:'right', i});
+            }
 
+            interleaved.forEach(({it, side, i}) => {
+                const isReal = it && it.name;
+                const accum = isReal ? ((parseFloat(String(it.today).replace(/,/g,''))||0)+(parseFloat(String(it.prev).replace(/,/g,''))||0)).toLocaleString('ko-KR') : "";
+                const sideLabel = side === 'left' ? '좌' : '우';
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
-                    <td class="title-cell text-left"><input type="text" id="eq-name-${i}" value="${item.name}" list="equipment-name-datalist" onpaste="handleBulkPasteEquipment(event, ${i})"></td>
-                    <td><input type="text" id="eq-today-${i}" value="${item.today}" oninput="autoSumEquipment(${i})" class="text-center bg-blue-50/50 font-bold"></td>
-                    <td><input type="text" id="eq-accum-${i}" value="${accumTotal}" oninput="autoCalcPrevEquipment(${i})" class="text-center font-bold bg-slate-50"></td>
-                    <td class="no-print text-center w-[44px]">
-                        <span draggable="true" ondragstart="handleRowDragStart(event,'equipment',null,${i})" ondragend="handleRowDragEnd(event)" class="cursor-grab text-slate-400 hover:text-slate-600 inline-block align-middle" title="드래그하여 순서 변경"><i data-lucide="grip-vertical" class="w-3.5 h-3.5 inline"></i></span>
-                        <button onclick="removeEquipmentRow(${i})" class="text-red-500 hover:text-red-700">
-                            <i data-lucide="minus-square" class="w-4 h-4 mx-auto"></i>
-                        </button>
+                    <td class="title-cell text-left"><input type="text" id="eq-${side}-name-${i}" value="${isReal ? it.name : ''}" placeholder="${isReal ? '' : `입력시 자동추가(${sideLabel})`}" list="equipment-name-datalist" onpaste="handleBulkPasteEquipment(event,'${side}',${i})" class="text-left${isReal ? '' : ' text-slate-400 focus:text-slate-800'}"></td>
+                    <td><input type="text" id="eq-${side}-today-${i}" value="${isReal ? it.today : ''}" oninput="autoSumEquipment('${side}',${i})" class="text-center bg-blue-50/50 font-bold"></td>
+                    <td><input type="text" id="eq-${side}-accum-${i}" value="${accum}" oninput="autoCalcPrevEquipment('${side}',${i})" class="text-center font-bold bg-slate-50 text-[11px]"></td>
+                    <td class="no-print text-center w-[36px] p-0">
+                        ${isReal ? `
+                        <span draggable="true" ondragstart="handleRowDragStart(event,'equipment','${side}',${i})" ondragend="handleRowDragEnd(event)" class="cursor-grab text-slate-400 hover:text-slate-600 inline-block align-middle"><i data-lucide="grip-vertical" class="w-3 h-3 inline"></i></span>
+                        <button onclick="removeEquipmentRow('${side}',${i})" class="text-red-500 hover:text-red-700"><i data-lucide="minus-square" class="w-3.5 h-3.5"></i></button>
+                        ` : ''}
                     </td>
                 `;
                 tbody.appendChild(tr);
                 tr.addEventListener("dragover", handleRowDragOver);
-                tr.addEventListener("drop", (e) => handleRowDrop(e, 'equipment', null, i));
+                tr.addEventListener("drop", (e) => handleRowDrop(e, 'equipment', side, i));
             });
-
-            // 2. 패딩 렌더링
-            for (let i = list.length; i < targetLen; i++) {
-                const tr = document.createElement("tr");
-                tr.className = "padded-empty-row";
-                tr.innerHTML = `
-                    <td class="title-cell text-left"><input type="text" id="eq-name-${i}" value="" placeholder="입력시 자동추가" list="equipment-name-datalist" onpaste="handleBulkPasteEquipment(event, ${i})" class="text-slate-400 focus:text-slate-800"></td>
-                    <td><input type="text" id="eq-today-${i}" value="" oninput="autoSumEquipment(${i})" class="text-center"></td>
-                    <td><input type="text" id="eq-accum-${i}" value="" oninput="autoCalcPrevEquipment(${i})" class="text-center font-bold bg-slate-50"></td>
-                    <td class="no-print text-center w-[30px]"></td>
-                `;
-                tbody.appendChild(tr);
-            }
 
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
@@ -3943,61 +4565,50 @@
             autoSaveToCache();
         }
 
-        function addManpowerRow() {
-            try {
-                syncStateFromDom();
-            } catch (e) {
-                console.warn("동기화 예외 무시");
-            }
+        function addManpowerRow(side = 'left') {
+            try { syncStateFromDom(); } catch(e) {}
             ensureStateStructure(state, activeDate);
-            if (!state.manpower) state.manpower = [];
-            state.manpower.push({ job: "신규 직종", today: "0", prev: "0" });
+            const key = side === 'right' ? 'manpowerRight' : 'manpowerLeft';
+            if (!state[key]) state[key] = [];
+            state[key].push({ job: "신규 직종", today: "0", prev: "0" });
             syncDomFromState();
             autoSaveToCache();
-            showToast("인원 투입 테이블에 새 직종이 추가되었습니다.");
+            showToast(`인원 ${side === 'right' ? '우측' : '좌측'}에 새 직종이 추가되었습니다.`);
         }
 
-        function removeManpowerRow(index) {
-            try {
-                syncStateFromDom();
-            } catch (e) {
-                console.warn("동기화 예외 무시");
-            }
+        function removeManpowerRow(side, index) {
+            try { syncStateFromDom(); } catch(e) {}
             pushUndoSnapshot();
             ensureStateStructure(state, activeDate);
-            if (!state.manpower) return;
-            state.manpower.splice(index, 1);
+            const key = side === 'right' ? 'manpowerRight' : 'manpowerLeft';
+            if (!state[key]) return;
+            state[key].splice(index, 1);
             syncDomFromState();
             autoSaveToCache();
         }
 
-        function addEquipmentRow() {
-            try {
-                syncStateFromDom();
-            } catch (e) {
-                console.warn("동기화 예외 무시");
-            }
+        function addEquipmentRow(side = 'left') {
+            try { syncStateFromDom(); } catch(e) {}
             ensureStateStructure(state, activeDate);
-            if (!state.equipment) state.equipment = [];
-            state.equipment.push({ name: "신규 장비", today: "0", prev: "0" });
+            const key = side === 'right' ? 'equipmentRight' : 'equipmentLeft';
+            if (!state[key]) state[key] = [];
+            state[key].push({ name: "신규 장비", today: "0", prev: "0" });
             syncDomFromState();
             autoSaveToCache();
-            showToast("장비 가동 테이블에 새 행이 추가되었습니다.");
+            showToast(`장비 ${side === 'right' ? '우측' : '좌측'}에 새 행이 추가되었습니다.`);
         }
 
-        function removeEquipmentRow(index) {
-            try {
-                syncStateFromDom();
-            } catch (e) {
-                console.warn("동기화 예외 무시");
-            }
+        function removeEquipmentRow(side, index) {
+            try { syncStateFromDom(); } catch(e) {}
             pushUndoSnapshot();
             ensureStateStructure(state, activeDate);
-            if (!state.equipment) return;
-            state.equipment.splice(index, 1);
+            const key = side === 'right' ? 'equipmentRight' : 'equipmentLeft';
+            if (!state[key]) return;
+            state[key].splice(index, 1);
             syncDomFromState();
             autoSaveToCache();
         }
+
 
         // ================= 스마트 이미지 업로드 및 강제 리사이징 압축 =================
         function triggerUpload(id) {
@@ -4148,12 +4759,11 @@
             drawHistory.push(drawingCanvas.toDataURL());
         }
 
-        function undoLastAction() {
+        function undoDrawingAction() {
             if(!drawingCtx || !drawingCanvas) return;
             if (drawHistory.length > 1) {
                 drawHistory.pop();
                 const prevStateSrc = drawHistory[drawHistory.length - 1];
-                
                 const img = new Image();
                 img.src = prevStateSrc;
                 img.onload = function() {
@@ -4373,21 +4983,6 @@
         }
 
         // ================= 백업 및 자동 캐싱 메커니즘 =================
-        function exportToJSON() {
-            syncStateFromDom();
-            reportDatabase[activeDate] = JSON.parse(JSON.stringify(state));
-
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(reportDatabase, null, 2));
-            const downloadAnchor = document.createElement('a');
-            
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `캠프롱_단일현장_작업일보_통합백업.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-            showToast("전체 날짜 이력이 포함된 통합 백업본이 다운로드되었습니다.");
-        }
-
         function importFromJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -4448,7 +5043,7 @@
             csvContent += "\r\n";
 
             csvContent += "■ 인원 투입 정보 (직종,금일투입,누계)\r\n";
-            state.manpower.forEach(m => {
+            [...(state.manpowerLeft||[]), ...(state.manpowerRight||[])].forEach(m => {
                 const total = (parseFloat(m.today) || 0) + (parseFloat(m.prev) || 0);
                 csvContent += `${m.job},${m.today},${total}\r\n`;
             });
@@ -4456,7 +5051,7 @@
             csvContent += "\r\n";
 
             csvContent += "■ 장비 투입 정보 (장비명,금일투입,누계)\r\n";
-            state.equipment.forEach(e => {
+            [...(state.equipmentLeft||[]), ...(state.equipmentRight||[])].forEach(e => {
                 const total = (parseFloat(e.today) || 0) + (parseFloat(e.prev) || 0);
                 csvContent += `${e.name},${e.today},${total}\r\n`;
             });
@@ -4537,86 +5132,64 @@
             updateLiveDashboard();
         }
 
-        function autoSumManpower(i) {
-            const tEl = document.getElementById(`man-today-${i}`);
-            const aEl = document.getElementById(`man-accum-${i}`);
+        function autoSumManpower(side, i) {
+            const tEl = document.getElementById(`man-${side}-today-${i}`);
+            const aEl = document.getElementById(`man-${side}-accum-${i}`);
             if (!tEl || !aEl) return;
-
-            const item = state.manpower[i];
+            const key = side === 'right' ? 'manpowerRight' : 'manpowerLeft';
+            const item = state[key] && state[key][i];
             const prevVal = parseFloat(String(item ? item.prev : "0").replace(/,/g, '')) || 0;
             const todayVal = parseFloat(tEl.value.replace(/,/g, '')) || 0;
-
             aEl.value = (prevVal + todayVal).toLocaleString('ko-KR');
             updateLiveDashboard();
         }
 
-        function autoCalcPrevManpower(i) {
-            const tEl = document.getElementById(`man-today-${i}`);
-            const aEl = document.getElementById(`man-accum-${i}`);
+        function autoCalcPrevManpower(side, i) {
+            const tEl = document.getElementById(`man-${side}-today-${i}`);
+            const aEl = document.getElementById(`man-${side}-accum-${i}`);
             if (!tEl || !aEl) return;
-
             const todayVal = parseFloat(tEl.value.replace(/,/g, '')) || 0;
             const accumVal = parseFloat(aEl.value.replace(/,/g, '')) || 0;
             let newPrev = accumVal - todayVal;
-            if (newPrev < 0) {
-                newPrev = 0;
-                aEl.value = todayVal.toLocaleString('ko-KR');
-                showToast("누계는 금일 투입량보다 작을 수 없어 전일누계를 0으로 보정했습니다.");
-            }
-
-            if (state.manpower[i]) {
-                state.manpower[i].prev = String(newPrev);
+            if (newPrev < 0) { newPrev = 0; aEl.value = todayVal.toLocaleString('ko-KR'); showToast("누계는 금일 투입량보다 작을 수 없어 전일누계를 0으로 보정했습니다."); }
+            const key = side === 'right' ? 'manpowerRight' : 'manpowerLeft';
+            if (!state[key]) state[key] = [];
+            if (state[key][i]) {
+                state[key][i].prev = String(newPrev);
             } else {
-                const jobEl = document.getElementById(`man-job-${i}`);
-                if (jobEl && jobEl.value.trim() !== "") {
-                    state.manpower[i] = {
-                        job: jobEl.value,
-                        today: tEl.value || "0",
-                        prev: String(newPrev)
-                    };
-                }
+                const jobEl = document.getElementById(`man-${side}-job-${i}`);
+                if (jobEl && jobEl.value.trim()) state[key][i] = { job: jobEl.value, today: tEl.value || "0", prev: String(newPrev) };
             }
             updateLiveDashboard();
         }
 
-        function autoSumEquipment(i) {
-            const tEl = document.getElementById(`eq-today-${i}`);
-            const aEl = document.getElementById(`eq-accum-${i}`);
+        function autoSumEquipment(side, i) {
+            const tEl = document.getElementById(`eq-${side}-today-${i}`);
+            const aEl = document.getElementById(`eq-${side}-accum-${i}`);
             if (!tEl || !aEl) return;
-
-            const item = state.equipment[i];
+            const key = side === 'right' ? 'equipmentRight' : 'equipmentLeft';
+            const item = state[key] && state[key][i];
             const prevVal = parseFloat(String(item ? item.prev : "0").replace(/,/g, '')) || 0;
             const todayVal = parseFloat(tEl.value.replace(/,/g, '')) || 0;
-
             aEl.value = (prevVal + todayVal).toLocaleString('ko-KR');
             updateLiveDashboard();
         }
 
-        function autoCalcPrevEquipment(i) {
-            const tEl = document.getElementById(`eq-today-${i}`);
-            const aEl = document.getElementById(`eq-accum-${i}`);
+        function autoCalcPrevEquipment(side, i) {
+            const tEl = document.getElementById(`eq-${side}-today-${i}`);
+            const aEl = document.getElementById(`eq-${side}-accum-${i}`);
             if (!tEl || !aEl) return;
-
             const todayVal = parseFloat(tEl.value.replace(/,/g, '')) || 0;
             const accumVal = parseFloat(aEl.value.replace(/,/g, '')) || 0;
             let newPrev = accumVal - todayVal;
-            if (newPrev < 0) {
-                newPrev = 0;
-                aEl.value = todayVal.toLocaleString('ko-KR');
-                showToast("누계는 금일 투입량보다 작을 수 없어 전일누계를 0으로 보정했습니다.");
-            }
-
-            if (state.equipment[i]) {
-                state.equipment[i].prev = String(newPrev);
+            if (newPrev < 0) { newPrev = 0; aEl.value = todayVal.toLocaleString('ko-KR'); showToast("누계는 금일 투입량보다 작을 수 없어 전일누계를 0으로 보정했습니다."); }
+            const key = side === 'right' ? 'equipmentRight' : 'equipmentLeft';
+            if (!state[key]) state[key] = [];
+            if (state[key][i]) {
+                state[key][i].prev = String(newPrev);
             } else {
-                const nameEl = document.getElementById(`eq-name-${i}`);
-                if (nameEl && nameEl.value.trim() !== "") {
-                    state.equipment[i] = {
-                        name: nameEl.value,
-                        today: tEl.value || "0",
-                        prev: String(newPrev)
-                    };
-                }
+                const nameEl = document.getElementById(`eq-${side}-name-${i}`);
+                if (nameEl && nameEl.value.trim()) state[key][i] = { name: nameEl.value, today: tEl.value || "0", prev: String(newPrev) };
             }
             updateLiveDashboard();
         }
@@ -4703,32 +5276,56 @@
             document.querySelectorAll("textarea.auto-grow").forEach(autoGrowTextarea);
         }
 
-        // 인쇄 전, 각 페이지 콘텐츠가 A4 한 장(297mm) 안에 들어오도록 자동 축소 비율 계산
+        // ── 인쇄 전: 각 페이지를 A4에 꽉 채우고 중앙정렬 ──
         function fitPagesToPrint() {
-            const MM_TO_PX = 96 / 25.4; // 96dpi 기준 mm -> px 환산
-            const frameHeightPx = 297 * MM_TO_PX;
-            const frameWidthPx = 210 * MM_TO_PX;
+            // 브라우저 화면 96dpi 기준 A4 픽셀
+            const DPI = 96;
+            const MM  = DPI / 25.4;
+            const A4W = Math.round(210 * MM);   // ≈ 794px
+            const A4H = Math.round(297 * MM);   // ≈ 1123px
 
             document.querySelectorAll(".print-page").forEach(page => {
-                page.style.transform = "none";
-                const renderedHeightPx = page.offsetHeight;
-                const renderedWidthPx = page.offsetWidth;
+                // 1. transform 초기화 → 실제 크기 측정
+                page.style.transform = "";
+                page.style.width     = "210mm";
+                page.style.height    = "auto";
+                page.style.minHeight = "auto";
 
-                const scaleByHeight = frameHeightPx / renderedHeightPx;
-                const scaleByWidth = frameWidthPx / renderedWidthPx;
-                // 내용이 페이지보다 작으면 확대, 크면 축소하여 A4 한 장을 항상 꽉 채움
-                const scale = Math.min(scaleByHeight, scaleByWidth);
+                const cW = page.scrollWidth  || A4W;
+                const cH = page.scrollHeight || A4H;
 
-                page.style.transform = `scale(${scale})`;
+                // 2. 가로·세로 각각의 비율 중 작은 값 선택
+                //    (내용이 적으면 확대, 많으면 축소 — 항상 A4 꽉 채움)
+                const sW = A4W / cW;
+                const sH = A4H / cH;
+                const scale = Math.min(sW, sH);
+
+                // 3. 중앙 정렬: 스케일 후 남는 여백을 translateX로 보정
+                const scaledW = cW * scale;
+                const offsetX = Math.max(0, (A4W - scaledW) / 2);
+
+                page.style.transform       = `translateX(${offsetX}px) scale(${scale})`;
                 page.style.transformOrigin = "top left";
+                page.style.height          = `${cH}px`;
+
+                // 4. 세로 여백 처리: 꽉 찰수록 space-between, 여유있으면 공간 유지
+                page.style.justifyContent = "space-between";
             });
         }
 
         window.addEventListener("beforeprint", fitPagesToPrint);
+        // 인쇄 후 transform 초기화 (통합 afterprint 핸들러)
         window.addEventListener("afterprint", () => {
             document.querySelectorAll(".print-page").forEach(page => {
-                page.style.transform = "";
+                page.style.transform      = "";
+                page.style.height         = "";
+                page.style.minHeight      = "";
+                page.style.width          = "";
+                page.style.justifyContent = "";
             });
+            ["stats-print-mode","summary-print-mode","weekly-print-mode"].forEach(cls =>
+                document.body.classList.remove(cls)
+            );
         });
 
         // 토스트 알림 메시지 제어
