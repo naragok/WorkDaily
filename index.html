@@ -637,7 +637,7 @@
                     <!-- 결재란 -->
                     <table class="w-auto border-collapse mb-1 text-center" style="width: 190px;">
                         <tr>
-                            <td rowspan="2" class="title-cell text-[10px] w-[30px]" style="padding: 2px; line-height:1.2;">결<br>제</td>
+                            <td rowspan="2" class="title-cell text-[10px] w-[30px]" style="padding: 2px; line-height:1.2;">결<br>재</td>
                             <td class="title-cell text-[10px]" style="padding: 2px;">현장대리인</td>
                         </tr>
                         <tr>
@@ -2024,17 +2024,10 @@
             if (container) container.innerHTML = "";
         }
 
-        // ESC로 미리보기 닫기
-        document.addEventListener("keydown", e => {
-            if (e.key === "Escape") {
-                closePrintPreview();
-                if (__sidebarOpen) toggleSidebar();
-            }
-        });
-
         // ================= 헤더 드롭다운 메뉴 =================
         function toggleMenu(id) {
             const target = document.getElementById(id);
+            if (!target) return;
             const wasHidden = target.classList.contains("hidden");
             document.querySelectorAll(".dropdown-menu-panel").forEach(panel => panel.classList.add("hidden"));
             if (wasHidden) target.classList.remove("hidden");
@@ -2045,8 +2038,13 @@
         document.addEventListener("click", (e) => {
             if (!e.target.closest(".dropdown-menu-wrapper")) closeAllMenus();
         });
+        // ESC: 드롭다운 닫기 + 미리보기 닫기 + 사이드바 닫기 (통합)
         document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") closeAllMenus();
+            if (e.key === "Escape") {
+                closeAllMenus();
+                closePrintPreview();
+                if (__sidebarOpen) toggleSidebar();
+            }
         });
 
         // ================= 단축키: Ctrl/Cmd + S 저장 =================
@@ -2271,11 +2269,14 @@
         // 엑셀/스프레드시트에서 여러 행을 복사해 붙여넣으면 줄바꿈=행, 탭=열로 자동 분해하여 일괄 등록
         function handleBulkPasteMaterial(event, side, startIndex) {
             const text = (event.clipboardData || window.clipboardData).getData('text');
-            if (!text || !text.includes('\n')) return; // 단일 값이면 기본 붙여넣기 동작 유지
+            if (!text || !text.includes('\n')) return;
             event.preventDefault();
+            syncStateFromDom();
             pushUndoSnapshot();
+            ensureStateStructure(state, activeDate);
             const rows = text.split(/\r?\n/).filter(r => r.trim() !== "");
             const targetList = (side === 'left') ? state.materialsLeft : state.materialsRight;
+            if (!targetList) return;
             rows.forEach((row, idx) => {
                 const cols = row.split('\t');
                 const item = {
@@ -2296,7 +2297,7 @@
             });
             syncDomFromState();
             autoSaveToCache();
-            showToast(`${rows.length}개 행을 일괄 등록했습니다.`);
+            showToast(`${rows.filter(r=>r.trim()).length}개 행을 일괄 등록했습니다.`);
         }
 
         function handleBulkPasteManpower(event, startIndex) {
@@ -2706,12 +2707,6 @@
             document.body.classList.add("weekly-print-mode");
             window.print();
         }
-
-        window.addEventListener("afterprint", () => {
-            document.body.classList.remove("weekly-print-mode");
-            document.body.classList.remove("summary-print-mode");
-            document.body.classList.remove("stats-print-mode");
-        });
 
         // ================= 전일 복제 =================
         function cloneFromPreviousDay() {
